@@ -8,6 +8,7 @@
 void carLeavesQueue(CarQueue *self, int num)
 {
 	self->length--;
+	ASYNC(self->bridge, carEnters, NULL);
 }
 
 void carArrives(CarQueue *self, int num)
