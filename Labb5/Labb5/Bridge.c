@@ -9,7 +9,7 @@
 
 void carEnters(Bridge *self, int num){
 	self->carcount++;
-	AFTER(self->traveltime, self, carLeaves, NULL);
+	AFTER(SEC(self->traveltime), self, carLeaves, NULL);
 	int args[2] = {2, self->carcount};
 	ASYNC(self->gui, printAt, args);
 }
