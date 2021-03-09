@@ -4,3 +4,13 @@
 #include <avr/io.h>
 #include <avr/portpins.h>
 #include <stdint.h>
+
+void carLeavesQueue(CarQueue *self, int num)
+{
+	self->length--;
+}
+
+void carArrives(CarQueue *self, int num)
+{
+	self->length++;
+}
