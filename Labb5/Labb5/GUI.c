@@ -5,7 +5,8 @@
 #include <avr/portpins.h>
 #include <stdint.h>
 
-int characters[10] = {0x1551,		// 0
+int characters[10] = {
+	0x1551,		// 0
 	0x0118,		// 1
 	0x1e11,		// 2
 	0x1b11,		// 3
