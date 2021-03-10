@@ -15,6 +15,6 @@ typedef struct{
 	{initObject(), 0, traveltime, gui}
 
 void carEnters(Bridge *self, int num);
-//void carLeaves(Bridge *self, int num);
+void carLeaves(Bridge *self, int num);
 
 #endif

@@ -5,11 +5,13 @@
 
 typedef struct{
 	Object super;
+	struct CarQueue *nBound;
+	struct CarQueue *sBound;
 }InputHandler;
 
-#define initInputHandler()\
-	{initObject()}
+#define initInputHandler(nBound, sBound)\
+	{initObject(), nBound, sBound}
 		
-		
+void inputs(InputHandler *self);
 		
 #endif

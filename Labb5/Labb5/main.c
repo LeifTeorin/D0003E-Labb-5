@@ -14,9 +14,13 @@
 #include "Inputhandler.h"
 #include "PortWriter.h"
 #include "TinyTimber.h"
+#include "Controller.h"
 
 GUI gui = initGUI();
 Bridge bridge = initBridge(5, &gui);
+CarQueue northB = initCarQueue(&bridge, &controller);
+CarQueue southB = initCarQueue(&bridge, &controller);
+Controller controller = initController(&northB, &southB);
 
 
 int main(void)
