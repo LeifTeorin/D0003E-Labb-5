@@ -5,4 +5,6 @@
  #include <avr/portpins.h>
  #include <stdint.h>
  
+ //TODO: Skriv en funktion som kommunicerar med datorn
+ 
  
