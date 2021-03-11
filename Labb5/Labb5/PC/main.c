@@ -25,8 +25,10 @@ int LightNorth; //0 = Röd; 1 = Grön.
 int LightSouth; //0 = Röd; 1 = Grön.
 
 void openPort()
+{
 	//Open serial port
 	//yeet = open(SERIAL_PORT)
+	
 }
 
 void readPort()
@@ -43,27 +45,30 @@ void writePort(uint8_t data)
 	int yeet = printf(yeet, &data, sizeof(data));
 	if(yeet < 0)
 	{
-		//Om det inte gick att printa datan blir det rip
-		printf("rip");
+		//Om det inte gick att printa datan
+		printf("L");
 	}
 }
 
 void Display()
 {
-	´//Displaya på datorn vad som händer
+	//Displaya på datorn vad som händer
+	printf("(1 = grön, 0 = röd)\n");
+	printf("North: ", LightNorth);
+	printf("South: ", LightSouth);
 }
 
 void Input()
 {
-	´//Keyboard inputs
+	//Keyboard inputs
+	
 }
 
 int main(void)
 {
-	
-	uint8_t data = 1001;
     while (1) 
     {
+		
     }
 }
 
