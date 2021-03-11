@@ -9,5 +9,7 @@ typedef struct{
 
 #define initPortWriter()\
 {initObject()}
+	
+void writeToPort(PortWriter *self, int num);
 
 #endif

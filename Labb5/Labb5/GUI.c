@@ -78,9 +78,11 @@ void init_program(GUI *self){
 	EIMSK = (1<<PCIE1)|(1<<PCIE0);
 	PCMSK0 = (1<<PCINT3)|(1<<PCINT2);
 	PCMSK1 = (1<<PCINT15)|(1<<PCINT14)|(1<<PCINT12);
+	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(0<<RXCIE0)|(0<<UDRIE0);
 	//	PCMSK1 = 0x80;
 	TCCR1A = 0xC0;
 	TCCR1B = 0x18;
+	PRR = 0x00;
 	
 	CLKPR = 0x80;
 	CLKPR = 0x00;

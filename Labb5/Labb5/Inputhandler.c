@@ -6,10 +6,10 @@
 #include <stdint.h>
 
 void inputs(InputHandler *self){
-	if(UCSR0B&0x1){
+	if(UDR0&0x1){
 		ASYNC(self->nBound, carArrives, NULL);
 	}
-	if((UCSR0B>>2)&0x1){
+	if((UDR0>>2)&0x1){
 		ASYNC(self->sBound, carArrives, NULL);
 	}
 }

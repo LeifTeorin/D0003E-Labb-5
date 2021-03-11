@@ -11,8 +11,8 @@ typedef struct{
 	int counter;
 }Controller;
 
-#define initController(north, south)\
-	{initObject(), north, south, north}
+#define initController()\
+	{initObject(), NULL, NULL, NULL}
 
 void switchQueue(Controller *self, int num);
 void emptyCurrent(Controller *self, int num);

@@ -5,6 +5,9 @@
  #include <avr/portpins.h>
  #include <stdint.h>
  
+ void writeToPort(PortWriter *self, int num){
+	 UDR0 
+ }
  //TODO: Skriv en funktion som kommunicerar med datorn
  
  

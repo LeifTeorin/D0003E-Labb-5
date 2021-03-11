@@ -17,11 +17,13 @@
 #include "Controller.h"
 
 GUI gui = initGUI();
+PortWriter writer = initPortWriter();
 Bridge bridge = initBridge(5, &gui);
-CarQueue northB = initCarQueue(&bridge, &controller);
-CarQueue southB = initCarQueue(&bridge, &controller);
-Controller controller = initController(&northB, &southB);
-
+Controller controller = initController();
+CarQueue northB = initCarQueue(&bridge, &controller, &writer, &gui);
+CarQueue southB = initCarQueue(&bridge, &controller, &writer, &gui);
+&controller->northbound = &northB;
+&controller->southbound = &southB;
 
 int main(void)
 {
