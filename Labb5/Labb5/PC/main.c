@@ -4,25 +4,40 @@
  * Author : Crill
  */ 
 
+
+/*
+Likewise, we will use the transmitter side of the USART for implementing the four output signals that control the status of each lamp of the traffic lights. The four signals will map onto the bits of the transmit data register as follows:
+
+
+*/
+
 #include <stdio.h>
 #include <termios.h>
 #include <fcntl.h>
 #include <stdlib.h>
+//POSIX
+#include <pthread.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-//POSIX
-#include <pthread.h>
 
 
 #define SERIAL_PORT "/dev/ttyS0"
 
 #include <avr/io.h>
 
+enum Z {
+	//NONE = 0,
+	RED = 0,
+	GREEN = 1
+	};
+
 int yeet;
 //Trafikljusen
 int LightNorth; //0 = Röd; 1 = Grön.
 int LightSouth; //0 = Röd; 1 = Grön.
+int[] writeBit = [0, 0, 0, 0];
+enum Z light = RED;
 
 void openPort()
 {
@@ -31,10 +46,19 @@ void openPort()
 	
 }
 
-void readPort()
+
+/*
+Bit 0: Northbound green light status
+Bit 1: Northbound red light status
+Bit 2: Southbound green light status
+Bit 3: Southbound red light status
+*/
+void *readPort(void *arg)
 {
 	//Read from serial port
 	//FÅ LAMPSTATUS
+	uint8_t data = 0;
+	uint8_t signal = 0;
 }
 
 void writePort(uint8_t data)
@@ -58,10 +82,65 @@ void Display()
 	printf("South: ", LightSouth);
 }
 
-void Input()
+void *Input(void *arg)
 {
+	char c;
 	//Keyboard inputs
+	while((c=getchar()) != 'q')
+	{
+	if(c == 'n')
+	{
+		arrivalSensor(1);
+	}
+	else if (c == 's')
+	{
+		arrivalSensor(0);
+	}
+}
+
+//Uppdatera bron och se om det finns något på den
+void updateBridge()
+{
 	
+}
+
+/*
+Om något åker in i bron
+Direction 1 = north, 0 = south
+Bit 1: Northbound bridge entry sensor activated
+Bit 3: Southbound bridge entry sensor activated
+*/
+void entrySensor(int dir)
+{
+	if(dir == 1)
+	{
+		writeBit[1] = 1;
+		writeBit[3] = 0;
+	}
+	else if (dir == 0)
+	{
+		writeBit[1] = 0;
+		writeBit[3] = 1;
+	}
+}
+
+/*
+Om någon kommer till bron
+Bit 0: Northbound car arrival sensor activated
+Bit 2: Southbound car arrival sensor activated
+*/
+void arrivalSensor(int dir)
+{
+	if(dir == 1)
+	{
+		writeBit[0] = 1;
+		writeBit[2] = 0;
+	}
+	else if (dir == 0)
+	{
+		writeBit[0] = 0;
+		writebit[2] = 1;
+	}
 }
 
 int main(void)
