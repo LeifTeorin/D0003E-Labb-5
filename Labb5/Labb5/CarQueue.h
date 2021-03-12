@@ -18,12 +18,12 @@ typedef struct{
 	struct GUI *gui;
 }CarQueue;
 
-#define initCarQueue(bridge, controller, writer, gui)\
-{initObject(), 0, 0, bridge, controller, writer, gui}
+#define initCarQueue(direction, bridge, controller, writer, gui)\
+{initObject(), 0, 0, direction, 0, bridge, controller, writer, gui}
 	
 void carLeavesQueue(CarQueue *self, int num);
 void carArrives(CarQueue *self, int num);
-void emptyCurrent(Controller *self, int num);
+void emptyQueue(CarQueue *self, int num);
 void greenLight(CarQueue *self, int num);
 void redLight(CarQueue *self, int num);
 

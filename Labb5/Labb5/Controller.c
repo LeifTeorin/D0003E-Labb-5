@@ -59,22 +59,26 @@ void startEmptying(Controller *self, int origin){
 	cQueue = self->currentQ;
 	bridge = self->bridge;
 	if(origin == 1 && nBound->length == 0){
-		if(cQueue->direction == 1){
+		int dir = cQueue->direction;
+		if(dir == 1){
 			ASYNC(self->currentQ, greenLight, NULL);
 		}else{
 			self->currentQ = self->southbound;
-			while(bridge->carcount > 0){
+			int carcnt = bridge->carcount;
+			while(carcnt > 0){
 				
 			}
 			ASYNC(self->currentQ, greenLight, NULL);
 		}
 	}
 	if(origin == 0 && sBound->length == 0){
-		if(cQueue->direction == 0){
+		int dir = cQueue->direction;
+		if(dir == 0){
 			ASYNC(self->currentQ, greenLight, NULL);
 		}else{
+			int carcnt = bridge->carcount;
 			self->currentQ = self->northbound;
-			while(bridge->carcount>0){
+			while(carcnt>0){
 				
 			}
 			ASYNC(self->currentQ, greenLight, NULL);
@@ -100,7 +104,8 @@ void findNonEmpty(Controller *self, int num){
 	sBound = self->southbound;
 	nBound = self->northbound;
 	if(nBound->length > 0 && sBound->length == 0){
-		if(sBound->light == 0){
+		int light = sBound->light;
+		if(light == 0){
 			self->currentQ = self->northbound;
 			ASYNC(self, emptyCurrent, NULL);
 		}
@@ -115,4 +120,9 @@ void findNonEmpty(Controller *self, int num){
 void connectRoads(Controller *self, struct CarQueue *northB, struct CarQueue *southB){
 	self->northbound = northB;
 	self->southbound = southB;
+}
+
+void startup(Controller *self, int num){
+	ASYNC(self->northbound, emptyQueue, NULL);
+	ASYNC(self->southbound, emptyQueue, NULL);
 }

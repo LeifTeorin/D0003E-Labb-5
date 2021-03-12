@@ -2,6 +2,7 @@
 #include "CarQueue.h"
 #include "PortWriter.h"
 #include "GUI.h"
+#include "Controller.h"
 
 #include <avr/io.h>
 #include <avr/portpins.h>
@@ -16,7 +17,8 @@ void carLeavesQueue(CarQueue *self, int num){
 }
 
 void emptyQueue(CarQueue *self, int num){
-	if(self->light){
+	int light = self->light;
+	if(light){
 		if(self->length>0){
 			self->length--;
 			ASYNC(self->bridge, carEnters, NULL);
@@ -27,7 +29,7 @@ void emptyQueue(CarQueue *self, int num){
 	}else{
 		self->counter = 0;
 	}
-	if(self->counter > 10 || self->length == 0){
+	if(self->counter > 10){
 		ASYNC(self->controller, switchLights, self->direction);
 		ASYNC(self, redLight, NULL);
 		self->counter = 0;
@@ -36,16 +38,19 @@ void emptyQueue(CarQueue *self, int num){
 }
 
 void carArrives(CarQueue *self, int num){
-	if(self->length == 0){
-		self->length++;
-		startEmptying(self->controller, self->direction);
+	int test = self->length;
+	int pos = self->direction;
+	if(test == 0){
+		(self->length)++;
+		ASYNC(self->controller, startEmptying, pos);
+		int args[2] = {4*pos, test + 1};
+		SYNC(self->gui, printAt, args);
 		// kolla med controllern, bron måste stått tom i minst 1 sek eller 5 beroende på, andra kön MÅSTE stå tom
-	}else{
+	}else if(test>0){
 		self->length++;
-		int args[2] = {4*(self->direction), self->length};
-		ASYNC(self->gui, printAt, args);
+		int args[2] = {4*pos, test + 1};
+		SYNC(self->gui, printAt, args);
 	}
-	
 }
 
 void greenLight(CarQueue *self, int num){
