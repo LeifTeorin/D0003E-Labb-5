@@ -59,13 +59,13 @@ int openPort()
 {
 	//Simulera termios
 
-	int fd = open(SERIAL_PORT, O_RDWR|O_NOCTTY|O_SYNC);
+	int fd = open("dev/ttyS0", O_RDWR|O_NOCTTY|O_SYNC);
 	struct termios tty;
 	if(tcgetattr(fd, &tty) < 0)
 	{
 		//Skriver ut felkoden fr�n tcgetattr
 		printf(strerror(errno));
-		return;
+		return -1;
 	}
 	//Output speed
 	cfsetospeed(&tty, (speed_t)speed);
@@ -114,7 +114,7 @@ int openPort()
 	{
 		//Printa attribute error
 		printf(strerror(errno));
-		return;
+		return -1;
 	}
 	return fd;
 }
@@ -127,7 +127,7 @@ void readPort(void *arg)
 
 	ssize_t readBytes = read(yeet, &c, 1);
 //	uint8_t signal = 0;
-	printf(c);
+	printf("",c);
 }
 
 void writePort(uint8_t data)
@@ -156,12 +156,12 @@ void Input(void *arg)
 	char c;
 	//Keyboard inputs
 	// här ska vi köra select tror jag
-	//int retval = select(1, &stdin, yeet, NULL, NULL);
+	int retval = 1; // select(1, &stdin, yeet, NULL, NULL);
 //	do
 	if(retval){
-		c = readchar();
+		c = getchar();
 		if(c == 'n'){
-			printf(c);
+			printf("%c", c);
 			writePort(0xFF);
 		}
 	}
@@ -185,7 +185,7 @@ void updateBridge()
 }
 
 /*
-Om n�got �ker in i bron
+Om något åker in i bron
 Direction 1 = north, 0 = south
 Bit 1: Northbound bridge entry sensor activated
 Bit 3: Southbound bridge entry sensor activated
@@ -226,11 +226,11 @@ void arrivalSensor(int dir)
 int main(void)
 {
 	yeet = openPort();
-	
-	write(yeet, "helo", 4);
+	int z = 0xFF;
+	write(yeet, &z, 1);
     while (1) 
     {
-		
+		write(yeet, 5, 1);
     }
 }
 
