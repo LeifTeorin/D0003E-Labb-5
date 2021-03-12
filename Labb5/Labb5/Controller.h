@@ -5,17 +5,21 @@
 
 typedef struct{
 	Object super;
+	struct Bridge *bridge;
 	struct CarQueue *northbound;
 	struct CarQueue *southbound;
 	struct CarQueue *currentQ;
 	int counter;
 }Controller;
 
-#define initController()\
-	{initObject(), NULL, NULL, NULL}
+#define initController(bridge)\
+	{initObject(), bridge, NULL, NULL, NULL, 0}
 
 void switchQueue(Controller *self, int num);
 void emptyCurrent(Controller *self, int num);
+void switchLights(Controller *self, int origin);
+void startEmptying(Controller *self, int origin);
 void findNonEmpty(Controller *self, int num);
+void connectRoads(Controller *self, struct CarQueue *northB, struct CarQueue *southB);
 
 #endif

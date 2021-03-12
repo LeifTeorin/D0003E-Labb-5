@@ -27,8 +27,8 @@ void emptyQueue(CarQueue *self, int num){
 	}else{
 		self->counter = 0;
 	}
-	if(self->counter > 10){
-		ASYNC(self->controller, lights, NULL);
+	if(self->counter > 10 || self->length == 0){
+		ASYNC(self->controller, switchLights, self->direction);
 		ASYNC(self, redLight, NULL);
 		self->counter = 0;
 	}
@@ -38,7 +38,8 @@ void emptyQueue(CarQueue *self, int num){
 void carArrives(CarQueue *self, int num){
 	if(self->length == 0){
 		self->length++;
-		// kolla med controllern, bron måste stått tom i minst 1 sek eller 5 beroende på
+		startEmptying(self->controller, self->direction);
+		// kolla med controllern, bron måste stått tom i minst 1 sek eller 5 beroende på, andra kön MÅSTE stå tom
 	}else{
 		self->length++;
 		int args[2] = {4*(self->direction), self->length};

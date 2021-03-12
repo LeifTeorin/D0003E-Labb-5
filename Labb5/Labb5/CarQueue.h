@@ -10,7 +10,7 @@ typedef struct{
 	Object super;
 	int length;
 	int light; // 1 är grönt och 0 är rött
-	int direction; // 1 är southbound och 0 är northbound
+	int direction; // 0 är northbound och 1 är southbound 
 	int counter;
 	struct Bridge *bridge;
 	struct Controller *controller;

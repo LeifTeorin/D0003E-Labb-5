@@ -11,12 +11,14 @@ void emptyCurrent(Controller *self, int num){
 		return;
 		//anropa portwriter
 	}*/
+	CarQueue *currentQ;
+	currentQ = self->currentQ;
 	ASYNC(self->currentQ, carLeavesQueue, NULL);
-	if(self->counter<10 && self->currentQ->length > 0){
+	if(self->counter<10 && currentQ->length > 0){
 		AFTER(SEC(1), self, emptyCurrent, NULL);
 		self->counter += 1;
 		//ASYNC(self->currentQ, redLight, NULL);
-	}else if(self->){
+	}else if(1){
 		ASYNC(self->currentQ, redLight, NULL);
 		switchQueue(self, NULL);
 		self->counter = 0;
@@ -28,13 +30,62 @@ void emptyCurrent(Controller *self, int num){
 	}
 }
 
-void lights(Controller *self, int num){
-	
+void switchLights(Controller *self, int origin){
+	if(origin == 1){
+		CarQueue *nBound;
+		nBound = self->northbound;
+		if(nBound->length > 0){
+			AFTER(SEC(5), self->northbound, greenLight, NULL);
+			self->currentQ = self->northbound;
+		}
+	}
+	if(origin == 0){
+		CarQueue *sBound;
+		sBound = self->southbound;
+		if(sBound->length > 0){
+			AFTER(SEC(5), self->southbound, greenLight, NULL);
+			self->currentQ = self->southbound;
+		}
+	}
 }
 
+void startEmptying(Controller *self, int origin){
+	CarQueue *nBound;
+	CarQueue *sBound;
+	CarQueue *cQueue;
+	Bridge *bridge;
+	nBound = self->northbound;
+	sBound = self->southbound;
+	cQueue = self->currentQ;
+	bridge = self->bridge;
+	if(origin == 1 && nBound->length == 0){
+		if(cQueue->direction == 1){
+			ASYNC(self->currentQ, greenLight, NULL);
+		}else{
+			self->currentQ = self->southbound;
+			while(bridge->carcount > 0){
+				
+			}
+			ASYNC(self->currentQ, greenLight, NULL);
+		}
+	}
+	if(origin == 0 && sBound->length == 0){
+		if(cQueue->direction == 0){
+			ASYNC(self->currentQ, greenLight, NULL);
+		}else{
+			self->currentQ = self->northbound;
+			while(bridge->carcount>0){
+				
+			}
+			ASYNC(self->currentQ, greenLight, NULL);
+		}
+	}
+}
 
 void switchQueue(Controller *self, int num){
-	if(self->currentQ->direction == 0){
+	CarQueue *cQ;
+	cQ = self->currentQ;
+	if(cQ->direction == 0){
 		self->currentQ = self->southbound;
 		// anropa portwriter
 	}else{
@@ -44,15 +95,24 @@ void switchQueue(Controller *self, int num){
 }
 
 void findNonEmpty(Controller *self, int num){
-	if(self->northbound->length > 0 && self->southbound->length == 0){
-		if(self->southbound->light == 0){
+	CarQueue *nBound;
+	CarQueue *sBound;
+	sBound = self->southbound;
+	nBound = self->northbound;
+	if(nBound->length > 0 && sBound->length == 0){
+		if(sBound->light == 0){
 			self->currentQ = self->northbound;
 			ASYNC(self, emptyCurrent, NULL);
 		}
-	}else if(self->northbound->length == 0 && self->southbound->length > 0){
-		if(self->northbound->light == 0){
+	}else if(nBound->length == 0 && sBound->length > 0){
+		if(nBound->light == 0){
 			self->currentQ = self->southbound;
 			ASYNC(self, emptyCurrent, NULL);
 		}
 	}
+}
+
+void connectRoads(Controller *self, struct CarQueue *northB, struct CarQueue *southB){
+	self->northbound = northB;
+	self->southbound = southB;
 }

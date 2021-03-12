@@ -2,6 +2,7 @@
 #define _INPUTHANDLER_
 
 #include "TinyTimber.h"
+#include "CarQueue.h"
 
 typedef struct{
 	Object super;

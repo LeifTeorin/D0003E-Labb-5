@@ -19,14 +19,14 @@
 GUI gui = initGUI();
 PortWriter writer = initPortWriter();
 Bridge bridge = initBridge(5, &gui);
-Controller controller = initController();
+Controller controller = initController(&bridge);
 CarQueue northB = initCarQueue(&bridge, &controller, &writer, &gui);
 CarQueue southB = initCarQueue(&bridge, &controller, &writer, &gui);
-&controller->northbound = &northB;
-&controller->southbound = &southB;
+//&(controller)->northbound = &northB; // fix this
+//&(controller)->southbound = &southB; // fix this
 
 int main(void)
 {
-
+	connectRoads(&controller, &northB, &southB);
 }
 
