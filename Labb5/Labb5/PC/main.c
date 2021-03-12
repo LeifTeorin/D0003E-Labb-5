@@ -27,8 +27,6 @@ Likewise, we will use the transmitter side of the USART for implementing the fou
 
 #define SERIAL_PORT "/dev/ttyS0"
 
-#include <avr/io.h>
-
 enum Z {
 	//NONE = 0,
 	RED = 0,
@@ -39,7 +37,8 @@ int yeet; // yeet blir vår filedescriptor tror jag
 //Trafikljusen
 int LightNorth; //0 = Röd; 1 = Grön.
 int LightSouth; //0 = Röd; 1 = Grön.
-int writeBit[4] = [0, 0, 0, 0];
+int writeBit[4] = {0, 0, 0, 0};
+int speed = 96000;
 enum Z light = RED;
 
 /*void openPort()
@@ -84,7 +83,7 @@ int openPort()
 	//Ingen hardware flowcontrol
 	tty.c_cflag &= ~CRTSCTS;  
 	//St�ng av CANONICAL INPUT
-	tty.c_lflag &= ~ICANON 
+	tty.c_lflag &= ~ICANON; 
 	//St�ng av Interrupts
 	tty.c_lflag &= ~ISIG; 
 	//St�ng av ECHO for shits and giggles
@@ -124,7 +123,7 @@ void readPort(void *arg)
 {
 	//Read from serial port
 	//F� LAMPSTATUS
-	uint_16_t c;
+	uint16_t c;
 
 	ssize_t readBytes = read(yeet, &c, 1);
 //	uint8_t signal = 0;
@@ -157,7 +156,7 @@ void Input(void *arg)
 	char c;
 	//Keyboard inputs
 	// här ska vi köra select tror jag
-	int retval = select(1, &stdin, yeet, NULL, NULL);
+	//int retval = select(1, &stdin, yeet, NULL, NULL);
 //	do
 	if(retval){
 		c = readchar();
@@ -220,7 +219,7 @@ void arrivalSensor(int dir)
 	else if (dir == 0)
 	{
 		writeBit[0] = 0;
-		writebit[2] = 1;
+		writeBit[2] = 1;
 	}
 }
 
