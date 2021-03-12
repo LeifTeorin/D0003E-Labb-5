@@ -20,6 +20,9 @@ Likewise, we will use the transmitter side of the USART for implementing the fou
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 #define SERIAL_PORT "/dev/ttyS0"
@@ -32,19 +35,19 @@ enum Z {
 	GREEN = 1
 };
 
-int yeet;
+int yeet; // yeet blir vår filedescriptor tror jag
 //Trafikljusen
 int LightNorth; //0 = Röd; 1 = Grön.
 int LightSouth; //0 = Röd; 1 = Grön.
-int[] writeBit = [0, 0, 0, 0];
+int writeBit[4] = [0, 0, 0, 0];
 enum Z light = RED;
 
-void openPort()
+/*void openPort()
 {
 	//Open serial port
 	//yeet = open(SERIAL_PORT)
 }
-
+*/
 
 /*
 Bit 0: Northbound green light status
@@ -53,9 +56,11 @@ Bit 2: Southbound green light status
 Bit 3: Southbound red light status
 */
 
-void openPort()
+int openPort()
 {
 	//Simulera termios
+
+	int fd = open(SERIAL_PORT, O_RDWR|O_NOCTTY|O_SYNC);
 	struct termios tty;
 	if(tcgetattr(fd, &tty) < 0)
 	{
@@ -112,21 +117,24 @@ void openPort()
 		printf(strerror(errno));
 		return;
 	}
-	return;
+	return fd;
 }
 
 void readPort(void *arg)
 {
 	//Read from serial port
 	//F� LAMPSTATUS
-	uint8_t data = read(1, &stdin, NULL, NULL, NULL, NULL);
-	
-	uint8_t signal = 0;
+	uint_16_t c;
+
+	ssize_t readBytes = read(yeet, &c, 1);
+//	uint8_t signal = 0;
+	printf(c);
 }
 
-void writePort(uint8_t data, int speed)
+void writePort(uint8_t data)
 {
-	int yeet = printf(yeet, &data, sizeof(data));
+	int bytes_written = write(yeet, &data, 1);
+//	int yeet = printf(yeet, &data, sizeof(data));
 	if(yeet < 0)
 	{
 		//Om det inte gick att printa datan
@@ -148,16 +156,27 @@ void Input(void *arg)
 {
 	char c;
 	//Keyboard inputs
-	do
-	{
+	// här ska vi köra select tror jag
+	int retval = select(1, &stdin, yeet, NULL, NULL);
+//	do
+	if(retval){
+		c = readchar();
+		if(c == 'n'){
+			printf(c);
+			writePort(0xFF);
+		}
+	}
+	/*{
 	if(c == 'n')
 	{
 		arrivalSensor(1);
+		writePort();
 	}
 	else if (c == 's')
 	{
 		arrivalSensor(0);
-	}while((c=getchar()) != 'q')
+		writePort();
+	}while((c=getchar()) != 'q')*/
 }
 
 //Uppdatera bron och se om det finns n�got p� den
@@ -207,6 +226,9 @@ void arrivalSensor(int dir)
 
 int main(void)
 {
+	yeet = openPort();
+	
+	write(yeet, "helo", 4);
     while (1) 
     {
 		
