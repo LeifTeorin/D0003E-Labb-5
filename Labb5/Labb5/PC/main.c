@@ -30,12 +30,12 @@ enum Z {
 	//NONE = 0,
 	RED = 0,
 	GREEN = 1
-	};
+};
 
 int yeet;
 //Trafikljusen
-int LightNorth; //0 = Röd; 1 = Grön.
-int LightSouth; //0 = Röd; 1 = Grön.
+int LightNorth; //0 = RÃ¶d; 1 = GrÃ¶n.
+int LightSouth; //0 = RÃ¶d; 1 = GrÃ¶n.
 int[] writeBit = [0, 0, 0, 0];
 enum Z light = RED;
 
@@ -43,7 +43,6 @@ void openPort()
 {
 	//Open serial port
 	//yeet = open(SERIAL_PORT)
-	
 }
 
 
@@ -53,11 +52,12 @@ Bit 1: Northbound red light status
 Bit 2: Southbound green light status
 Bit 3: Southbound red light status
 */
-void *readPort(void *arg)
+void readPort(void *arg)
 {
 	//Read from serial port
-	//FÅ LAMPSTATUS
-	uint8_t data = 0;
+	//Fï¿½ LAMPSTATUS
+	uint8_t data = read(1, &stdin, NULL, NULL, NULL, NULL);
+	
 	uint8_t signal = 0;
 }
 
@@ -70,42 +70,45 @@ void writePort(uint8_t data)
 	if(yeet < 0)
 	{
 		//Om det inte gick att printa datan
-		printf("L");
+		printf("OHELL");
 	}
 }
 
 void Display()
 {
-	//Displaya på datorn vad som händer
-	printf("(1 = grön, 0 = röd)\n");
+	//Displaya pï¿½ datorn vad som hï¿½nder
+	printf("(1 = grï¿½n, 0 = rï¿½d)\n");
 	printf("North: ", LightNorth);
 	printf("South: ", LightSouth);
+	printf("Northbound cars");
+	printf("Southbound cars");
 }
 
-void *Input(void *arg)
+void Input(void *arg)
 {
 	char c;
-	//Keyboard inputs
+	//Keyboard inputs 
 	while((c=getchar()) != 'q')
 	{
-	if(c == 'n')
-	{
-		arrivalSensor(1);
-	}
-	else if (c == 's')
-	{
-		arrivalSensor(0);
+		if(c == 'n')
+		{
+			arrivalSensor(1);
+		}
+		else if (c == 's')
+		{
+			arrivalSensor(0);
+		}
 	}
 }
 
-//Uppdatera bron och se om det finns något på den
+//Uppdatera bron och se om det finns nï¿½got pï¿½ den
 void updateBridge()
 {
 	
 }
 
 /*
-Om något åker in i bron
+Om nï¿½got ï¿½ker in i bron
 Direction 1 = north, 0 = south
 Bit 1: Northbound bridge entry sensor activated
 Bit 3: Southbound bridge entry sensor activated
@@ -125,7 +128,7 @@ void entrySensor(int dir)
 }
 
 /*
-Om någon kommer till bron
+Om nï¿½gon kommer till bron
 Bit 0: Northbound car arrival sensor activated
 Bit 2: Southbound car arrival sensor activated
 */
