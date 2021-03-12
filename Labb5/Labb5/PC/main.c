@@ -59,7 +59,7 @@ int openPort()
 {
 	//Simulera termios
 
-	int fd = open("dev/ttyS0", O_RDWR|O_NOCTTY|O_SYNC);
+	/*int fd = open("dev/ttyS0", O_RDWR|O_NOCTTY|O_SYNC);
 	struct termios tty;
 	if(tcgetattr(fd, &tty) < 0)
 	{
@@ -114,6 +114,37 @@ int openPort()
 	{
 		//Printa attribute error
 		printf(strerror(errno));
+		return -1;
+	}
+	return fd;
+	*/
+	int fd = open("/dev/ttyS0", O_RDWR);
+	if (fd < 0) {
+		printf("Can't open file! \n");
+	}
+
+
+	struct termios termios_p;
+	if (tcgetattr(fd, &termios_p)) {
+		printf("Couldn't get termios attributes! \n");
+		return -1;
+	}
+
+
+	tcflush(fd, TCIFLUSH); //Flush COM1 recieved data that is not read
+	//Baud rate(signal changes per second) = 9600 | Character size mask 8 | Set two stop bits rather than one | Enable receiver | Ignore modem control lines | Lower modem control lines after last process closes the device (hang up) | Enable input parity checking
+	termios_p.c_cflag = B9600 | CS8 | CSTOPB | CREAD | CLOCAL | HUPCL | INPCK;
+	// NOT (Echo input characters | echo the NL character even if ECHO is not set)
+	termios_p.c_lflag &= ~(ECHO | ECHONL | ICANON);
+	// Avoid inter-message overlap.
+	termios_p.c_cc[VTIME] = 10;
+	termios_p.c_cc[VMIN] = 1;
+	cfsetispeed(&termios_p, B9600);
+	cfsetospeed(&termios_p, B9600);
+
+
+	if (tcsetattr(fd, TCSANOW, &termios_p)) {
+		printf("Could not set termios attributes! \n");
 		return -1;
 	}
 	return fd;
