@@ -53,7 +53,70 @@ Bit 1: Northbound red light status
 Bit 2: Southbound green light status
 Bit 3: Southbound red light status
 */
-void *readPort(void *arg)
+
+void openPort()
+{
+	//Simulera termios
+	struct termios tty;
+	if(tcgetattr(fd, &tty) < 0)
+	{
+		//Skriver ut felkoden från tcgetattr
+		printf(strerror(errno));
+		return;
+	}
+	//Output speed
+	cfsetospeed(&tty, (speed_t)speed);
+	//Input speed
+	cfsetispeed(&tty, (speed_t)speed);
+	
+	tty.c_cflag |= CLOCAL | CREAD;
+	tty.c_cflag &= ~CSIZE;
+	//Set 8bit
+	tty.c_cflag |= CS8;
+	//Stäng av parity bit
+	tty.c_cflag &= ~PARENB;
+	//Kräv enbart en stop bit
+	tty.c_cflag &= ~CSTOPB;
+	//Ingen hardware flowcontrol
+	tty.c_cflag &= ~CRTSCTS;  
+	//Stäng av CANONICAL INPUT
+	tty.c_lflag &= ~ICANON 
+	//Stäng av Interrupts
+	tty.c_lflag &= ~ISIG; 
+	//Stäng av ECHO for shits and giggles
+	tty.c_lflag &= ~(ECHO | ECHOE | ECHONL | IEXTEN);
+	//Ignorera inte carriage return
+	tty.c_iflag &= ~IGNCR; 
+	//Disabla input parity
+	tty.c_iflag &= ~INPCK;
+	//Disable Translations och posix stuff
+	tty.c_iflag &= ~(INLCR | ICRNL | IUCLC | IMAXBEL);
+	//Disabla XON/XOFF flow control, restarta ej stoppad output
+	tty.c_iflag &= ~(IXON | IXOFF | IXANY);  
+	//Disable output processing
+	tty.c_oflag &= ~OPOST;
+	
+	///////////////////////
+	//IDK OM DESSA BEHÖVS//
+	///////////////////////
+	//Sätt ej end of line characters
+	tty.c_cc[VEOL] = 0;
+	//Sätt ej end of line characters 2.0 electric boogaloo
+	tty.c_cc[VEOL2] = 0;
+	//Sätt ej end of line characters the third.
+	tty.c_cc[VEOF] = 0x04;
+	
+	//TCSANOW = immediate change
+	if(tcsetattr(fd, TCSANOW, &tty) != 0)
+	{
+		//Printa attribute error
+		printf(strerror(errno));
+		return;
+	}
+	return;
+}
+
+void readPort(void *arg)
 {
 	//Read from serial port
 	//FÅ LAMPSTATUS
@@ -61,11 +124,8 @@ void *readPort(void *arg)
 	uint8_t signal = 0;
 }
 
-void writePort(uint8_t data)
+void writePort(uint8_t data, int speed)
 {
-	//Write to serial port
-	//GE SENSOR SIGNALS
-	//1 om success, 0 om fail
 	int yeet = printf(yeet, &data, sizeof(data));
 	if(yeet < 0)
 	{
@@ -82,11 +142,11 @@ void Display()
 	printf("South: ", LightSouth);
 }
 
-void *Input(void *arg)
+void Input(void *arg)
 {
 	char c;
 	//Keyboard inputs
-	while((c=getchar()) != 'q')
+	do
 	{
 	if(c == 'n')
 	{
@@ -95,7 +155,7 @@ void *Input(void *arg)
 	else if (c == 's')
 	{
 		arrivalSensor(0);
-	}
+	}while((c=getchar()) != 'q')
 }
 
 //Uppdatera bron och se om det finns något på den
