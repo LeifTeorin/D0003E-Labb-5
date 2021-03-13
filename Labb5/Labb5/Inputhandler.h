@@ -10,10 +10,11 @@ typedef struct{
 	struct CarQueue *nBound;
 	struct CarQueue *sBound;
 	struct GUI *gui;
+	struct Controller *controller;
 }InputHandler;
 
-#define initInputHandler(nBound, sBound, gui)\
-	{initObject(), nBound, sBound, gui}
+#define initInputHandler(nBound, sBound, gui, controller)\
+	{initObject(), nBound, sBound, gui, controller}
 		
 void inputs(InputHandler *self);
 void testInputs(InputHandler *self);

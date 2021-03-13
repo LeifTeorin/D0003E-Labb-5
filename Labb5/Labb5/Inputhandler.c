@@ -16,9 +16,9 @@ void inputs(InputHandler *self){
 
 void testInputs(InputHandler *self){
 	if((PINE&0x04)==0){
-		SYNC(self->nBound, carArrives, NULL);
+		ASYNC(self->controller, addNorth, NULL);
 	}
 	if((PINE&0x08)==0){
-		SYNC(self->sBound, carArrives, NULL);
+		ASYNC(self->controller, addSouth, NULL);
 	}
 }

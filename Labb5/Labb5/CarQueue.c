@@ -25,20 +25,22 @@ void emptyQueue(CarQueue *self, int num){
 			int args[2] = {(self->direction)*4, self->length};
 			ASYNC(self->gui, printAt, args);
 			(self->counter)++;
+		}else{
+			self->light = 0;
 		}
 	}else{
 		self->counter = 0;
 	}
-	if(self->counter > 10){
+	/*if(self->counter > 10){
 		ASYNC(self->controller, switchLights, self->direction);
 		ASYNC(self, redLight, NULL);
 		self->counter = 0;
-	}
+	}*/
 	AFTER(SEC(1), self, emptyQueue, NULL);
 }
 
 void carArrives(CarQueue *self, int num){
-	int test = self->length;
+	/*int test = self->length;
 	int pos = self->direction;
 	if(test == 0){
 		(self->length)++;
@@ -50,15 +52,20 @@ void carArrives(CarQueue *self, int num){
 		self->length++;
 		int args[2] = {4*pos, test + 1};
 		SYNC(self->gui, printAt, args);
-	}
+	}*/
+	int test = self->length;
+	int pos = self->direction;
+	self->length++;
+	int args[2] = {4*pos, test + 1};
+	SYNC(self->gui, printAt, args);
 }
 
 void greenLight(CarQueue *self, int num){
 	self->light = 1;
-	ASYNC(self->writer, writeToPort, (1<<2*((self->direction))));
+//	ASYNC(self->writer, writeToPort, (1<<2*((self->direction))));
 }
 
 void redLight(CarQueue *self, int num){
 	self->light = 0;
-	ASYNC(self->writer, writeToPort, (2<<(2*(self->direction))));
+//	ASYNC(self->writer, writeToPort, (2<<(2*(self->direction))));
 }

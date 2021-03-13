@@ -11,7 +11,7 @@ void emptyCurrent(Controller *self, int num){
 		return;
 		//anropa portwriter
 	}*/
-	CarQueue *currentQ;
+	/*CarQueue *currentQ;
 	currentQ = self->currentQ;
 	ASYNC(self->currentQ, carLeavesQueue, NULL);
 	if(self->counter<10 && currentQ->length > 0){
@@ -27,7 +27,30 @@ void emptyCurrent(Controller *self, int num){
 	}else{
 		ASYNC(self->currentQ, redLight, NULL);
 		self->counter = 0;
+	}*/
+	CarQueue *currentQ;
+	CarQueue *northQ;
+	CarQueue *southQ;
+	int bl;
+	northQ = self->northbound;
+	southQ = self->southbound;
+	currentQ = self->currentQ;
+	if(currentQ->direction==1){
+		self->currentQ = self->northbound;
+		ASYNC(self->southbound, redLight, NULL);
+		ASYNC(self->northbound, greenLight, NULL);
+	}else{
+		self->currentQ = self->southbound;
+		ASYNC(self->northbound, redLight, NULL);
+		ASYNC(self->southbound, greenLight, NULL);
 	}
+	currentQ = self->currentQ;
+	if(currentQ->length>10){
+		bl = 10;
+	}else{
+		bl = currentQ->length;
+	}
+	AFTER(SEC(5 + bl), self, emptyCurrent, NULL);
 }
 
 void switchLights(Controller *self, int origin){
@@ -125,4 +148,61 @@ void connectRoads(Controller *self, struct CarQueue *northB, struct CarQueue *so
 void startup(Controller *self, int num){
 	ASYNC(self->northbound, emptyQueue, NULL);
 	ASYNC(self->southbound, emptyQueue, NULL);
+}
+
+void addNorth(Controller *self, int num){
+	CarQueue *northQ;
+	CarQueue *southQ;
+	CarQueue *cQueue;
+	Bridge *bridge;
+	bridge = self->bridge;
+	northQ = self->northbound;
+	southQ = self->southbound;
+	cQueue = self->currentQ;
+	int northlength = northQ->length;
+	if(northlength == 0 && southQ->length == 0){
+		ASYNC(self->northbound, carArrives, NULL);
+		int dir = cQueue->direction;
+		if(dir == 0){
+			ASYNC(self->currentQ, greenLight, NULL);
+		}else{
+			self->currentQ = self->northbound;
+//			int carcnt = bridge->carcount;
+			while(bridge->carcount > 0){
+				
+			}
+			ASYNC(self->currentQ, greenLight, NULL);
+		}
+	}else{
+		ASYNC(self->northbound, carArrives, NULL);
+	}
+}
+
+void addSouth(Controller *self, int num){
+	CarQueue *northQ;
+	CarQueue *southQ;
+	CarQueue *cQueue;
+	Bridge *bridge;
+	bridge = self->bridge;
+	northQ = self->northbound;
+	southQ = self->southbound;
+	cQueue = self->currentQ;
+	int northlength = northQ->length;
+	int southlength = southQ->length;
+	if(southlength == 0 && northlength == 0){
+		ASYNC(self->southbound, carArrives, NULL);
+		int dir = cQueue->direction;
+		if(dir == 1){
+			ASYNC(self->currentQ, greenLight, NULL);
+		}else{
+			self->currentQ = self->southbound;
+			int carcnt = bridge->carcount;
+			while(carcnt > 0){
+				
+			}
+			ASYNC(self->currentQ, greenLight, NULL);
+		}
+	}else{
+		ASYNC(self->southbound, carArrives, NULL);
+	}
 }
