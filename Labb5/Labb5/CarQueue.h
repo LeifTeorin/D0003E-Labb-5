@@ -13,18 +13,19 @@ typedef struct{
 	int direction; // 0 är northbound och 1 är southbound 
 	int counter;
 	struct Bridge *bridge;
-	struct Controller *controller;
+//	struct Controller *controller;
 	struct PortWriter *writer;
 	struct GUI *gui;
 }CarQueue;
 
-#define initCarQueue(direction, bridge, controller, writer, gui)\
-{initObject(), 0, 0, direction, 0, bridge, controller, writer, gui}
+#define initCarQueue(direction, bridge, writer, gui)\
+{initObject(), 0, 0, direction, 0, bridge, writer, gui}
 	
 void carLeavesQueue(CarQueue *self, int num);
 void carArrives(CarQueue *self, int num);
 void emptyQueue(CarQueue *self, int num);
 void greenLight(CarQueue *self, int num);
 void redLight(CarQueue *self, int num);
+int isEmpty(CarQueue *self, int num);
 
 #endif

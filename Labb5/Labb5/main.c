@@ -23,9 +23,9 @@
 GUI gui = initGUI();
 PortWriter writer = initPortWriter();
 Bridge bridge = initBridge(5, &gui);
-Controller controller = initController(&bridge);
-CarQueue northB = initCarQueue(0, &bridge, &controller, &writer, &gui);
-CarQueue southB = initCarQueue(1, &bridge, &controller, &writer, &gui);
+CarQueue northB = initCarQueue(0, &bridge, &writer, &gui);
+CarQueue southB = initCarQueue(1, &bridge, &writer, &gui);
+Controller controller = initController(&bridge, &northB, &southB);
 InputHandler inputhandl = initInputHandler(&northB, &southB, &gui, &controller);
 //&(controller)->northbound = &northB; // fix this
 //&(controller)->southbound = &southB; // fix this
@@ -55,7 +55,7 @@ int main(void)
 	INSTALL(&inputs, inputs, IRQ_USART0_RX);
 //	INSTALL(&inputs, testInputs, IRQ_PCINT0);
 //	tinytimber(&controller, startup, NULL);
-	tinytimber(&writer, writeToPort, 0);
+//	tinytimber(&writer, writeToPort, 0);
 //	UDR0 = 7;
 }
 

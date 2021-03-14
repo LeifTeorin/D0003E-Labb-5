@@ -10,10 +10,11 @@ typedef struct{
 	struct CarQueue *southbound;
 	struct CarQueue *currentQ;
 	int counter;
+	int curr;
 }Controller;
 
-#define initController(bridge)\
-	{initObject(), bridge, NULL, NULL, NULL, 0}
+#define initController(bridge, northB, southB)\
+	{initObject(), bridge, northB, southB, NULL, 0}
 
 void switchQueue(Controller *self, int num);
 void emptyCurrent(Controller *self, int num);

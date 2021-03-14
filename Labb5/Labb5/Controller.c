@@ -35,14 +35,17 @@ void emptyCurrent(Controller *self, int num){
 	northQ = self->northbound;
 	southQ = self->southbound;
 	currentQ = self->currentQ;
+	int northEmpty = SYNC(self->northbound, isEmpty, NULL);
+	int southEmpty = SYNC(self->southbound, isEmpty, NULL);
+	if(northEmpty == 0 || southEmpty == 0){
 	if(currentQ->direction==1){
 		self->currentQ = self->northbound;
 		ASYNC(self->southbound, redLight, NULL);
-		ASYNC(self->northbound, greenLight, NULL);
+		AFTER(SEC(5), self->northbound, greenLight, NULL);
 	}else{
 		self->currentQ = self->southbound;
 		ASYNC(self->northbound, redLight, NULL);
-		ASYNC(self->southbound, greenLight, NULL);
+		AFTER(SEC(5), self->southbound, greenLight, NULL);
 	}
 	currentQ = self->currentQ;
 	if(currentQ->length>10){
@@ -51,6 +54,12 @@ void emptyCurrent(Controller *self, int num){
 		bl = currentQ->length;
 	}
 	AFTER(SEC(5 + bl), self, emptyCurrent, NULL);
+	}else if((northEmpty && !southEmpty) || (!northEmpty && southEmpty)){
+		
+	}else{
+		
+	}
+	
 }
 
 void switchLights(Controller *self, int origin){
