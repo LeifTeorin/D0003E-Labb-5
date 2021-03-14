@@ -44,7 +44,9 @@ int northQ;
 int bridgecnt;
 int speed = 96000;
 enum Z light = RED;
-pthread_t readz;
+pthread_t readinputs;
+pthread_t sim;
+pthread_t readinputs;
 
 /*void openPort()
 {
@@ -228,6 +230,7 @@ void enterBridge()
 {
 	bridgecnt++;
 	// do some gui magic
+	// skriv till avr
 	sleep(5);
 	bridgecnt--;
 }
@@ -254,21 +257,28 @@ void entrySensor(int dir)
 }
 
 void simulator(void){
-
+	northQ = 0;
+	southQ = 0;
+	bridgecnt = 0;
 	while(1){
 
-		if(LightNorth){
-			if(northQ > 0){
-				northQ--;
-				enterBridge();
-			}
+		if(LightNorth && (northQ > 0)){
+			northQ--;
+			pthread_t cartobridge;
+			pthread_create(&cartobridge, NULL, enterBridge, NULL);
+			entrySensor(1);
+//			antingen fixar denna gui eller så tar bron den
+//			enterBridge();
+			sleep(1);
 		}
 
-		if(LightSouth){
-			if(southQ > 0){
-				southQ--;
-				enterBridge();
-			}
+		if(LightSouth && (southQ > 0)){
+			southQ--;
+			pthread_t cartobridge;
+			pthread_create(&cartobridge, NULL, enterBridge, NULL);
+//			enterBridge();
+			entrySensor(0):
+			sleep(1);
 		}
 	}
 }
