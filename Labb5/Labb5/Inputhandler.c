@@ -8,10 +8,26 @@
 #include <stdint.h>
 
 void inputs(InputHandler *self){
-	if(UDR0 == 0xff){
-		int args[2] = {0, 69};
-		SYNC(self->gui, printAt, args);
+	char recieved = UDR0;
+	if(recieved&1 == 1){ // northbound car arrival
+		ASYNC(self->nBound, carArrives, NULL);
 	}
+	if((recieved>>1)&1 == 1){ // northbound enters bridge
+		ASYNC(self->nBound, carLeavesQueue, NULL);
+	}
+	if((recieved>>2)&1 == 1){
+		ASYNC(self->sBound, carArrives, NULL);
+	}
+	if((recieved>>3)&1 == 1){
+		ASYNC(self->sBound, carLeavesQueue, NULL);
+	}
+	/*
+	int args[2] = {0, recieved+10};
+//	ASYNC(self->gui, printAt, args);
+	printAt(self->gui, args);
+	while ((UCSR0A & (1 << UDRE0)) == 0) {};
+	UDR0 = recieved + 100;
+	*/
 }
 
 void testInputs(InputHandler *self){

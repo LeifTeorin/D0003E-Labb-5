@@ -8,6 +8,14 @@
 #include <avr/portpins.h>
 #include <stdint.h>
 
+int isEmpty(CarQueue *self, int num){
+	if(self->length>0){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
 void carLeavesQueue(CarQueue *self, int num){
 	self->length--;
 //	self->light = 0;
@@ -62,10 +70,10 @@ void carArrives(CarQueue *self, int num){
 
 void greenLight(CarQueue *self, int num){
 	self->light = 1;
-//	ASYNC(self->writer, writeToPort, (1<<2*((self->direction))));
+	ASYNC(self->writer, writeToPort, (1<<2*((self->direction)))); // skickar 01 binärt
 }
 
 void redLight(CarQueue *self, int num){
 	self->light = 0;
-//	ASYNC(self->writer, writeToPort, (2<<(2*(self->direction))));
+	ASYNC(self->writer, writeToPort, (2<<(2*(self->direction)))); //skickar 10 binärt 
 }
