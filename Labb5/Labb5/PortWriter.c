@@ -6,7 +6,8 @@
  #include <stdint.h>
  
  void writeToPort(PortWriter *self, int num){
-	  
+	while ((UCSR0A & (1 << UDRE0)) == 0) {};
+	UDR0 = num; 
  }
  //TODO: Skriv en funktion som kommunicerar med datorn
  

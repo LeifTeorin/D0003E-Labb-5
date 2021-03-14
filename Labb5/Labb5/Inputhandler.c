@@ -8,10 +8,12 @@
 #include <stdint.h>
 
 void inputs(InputHandler *self){
-	if(UDR0 == 0xff){
-		int args[2] = {0, 69};
-		SYNC(self->gui, printAt, args);
-	}
+	char recieved = UDR0;
+	int args[2] = {0, recieved+10};
+//	ASYNC(self->gui, printAt, args);
+	printAt(self->gui, args);
+	while ((UCSR0A & (1 << UDRE0)) == 0) {};
+	UDR0 = recieved + 100;
 }
 
 void testInputs(InputHandler *self){

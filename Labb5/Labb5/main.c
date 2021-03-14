@@ -30,25 +30,32 @@ InputHandler inputhandl = initInputHandler(&northB, &southB, &gui, &controller);
 //&(controller)->northbound = &northB; // fix this
 //&(controller)->southbound = &southB; // fix this
 
-int main(void)
-{
-	//Interrupt request
+void init_usart(unsigned int ubrr){
+/*	//Interrupt request
 	EIFR = 0xC0;
 	
 	//Cause an interrupt
-	EIMSK = 0xC0;
-	UBRR0H = (unsigned char)(MYUBRR>>8);
-	UBRR0L = (unsigned char)MYUBRR;
+	EIMSK = 0xC0;*/
+	UBRR0H = (unsigned char)(ubrr>>8);
+	UBRR0L = (unsigned char)ubrr;
 	
 	/* Enable receiver and transmitter */
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<RXCIE0);
 	
 	/* Set frame format: 8data, 1stop bit */
 	UCSR0C = (0<<USBS0)|(1<<UCSZ00)|(1<<UCSZ01);
-	connectRoads(&controller, &northB, &southB);
+}
+
+int main(void)
+{
 	init_program(&gui);
-//	INSTALL(&inputs, inputs, IRQ_USART0_RX);
-	INSTALL(&inputs, testInputs, IRQ_PCINT0);
-	tinytimber(&controller, startup, NULL);
+	init_usart(MYUBRR);
+//	connectRoads(&controller, &northB, &southB);
+//	sei();
+	INSTALL(&inputs, inputs, IRQ_USART0_RX);
+//	INSTALL(&inputs, testInputs, IRQ_PCINT0);
+//	tinytimber(&controller, startup, NULL);
+	tinytimber(&writer, writeToPort, 0);
+//	UDR0 = 7;
 }
 
