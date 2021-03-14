@@ -23,6 +23,7 @@ Likewise, we will use the transmitter side of the USART for implementing the fou
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "Simulator.h"
 
 
 #define SERIAL_PORT "/dev/ttyS0"
@@ -38,6 +39,9 @@ int yeet; // yeet blir vår filedescriptor tror jag
 int LightNorth; //0 = Röd; 1 = Grön.
 int LightSouth; //0 = Röd; 1 = Grön.
 int writeBit[4] = {0, 0, 0, 0};
+int southQ;
+int northQ;
+int bridgecnt;
 int speed = 96000;
 enum Z light = RED;
 
@@ -210,10 +214,14 @@ void Input(void *arg)
 }
 
 //Uppdatera bron och se om det finns n�got p� den
-void updateBridge()
+void enterBridge()
 {
-	
+	bridgecnt++;
+	// do some gui magic
+	sleep(5);
+	bridgecnt--;
 }
+
 
 /*
 Om något åker in i bron
@@ -232,6 +240,26 @@ void entrySensor(int dir)
 	{
 		writeBit[1] = 0;
 		writeBit[3] = 1;
+	}
+}
+
+void simulator(void){
+
+	while(1){
+
+		if(LightNorth){
+			if(northQ > 0){
+				northQ--;
+				enterBridge();
+			}
+		}
+
+		if(LightSouth){
+			if(southQ > 0){
+				southQ--;
+				enterBridge();
+			}
+		}
 	}
 }
 
