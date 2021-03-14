@@ -280,6 +280,10 @@ void simulator(void){
 			entrySensor(0):
 			sleep(1);
 		}
+
+		if(LightNorth && LightSouth){
+			printf("ohell, nu är båda gröna");
+		}
 	}
 }
 
