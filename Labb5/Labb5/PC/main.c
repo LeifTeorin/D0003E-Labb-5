@@ -206,10 +206,10 @@ void *readPort(void *arg)
 			if((readBytes&3)==1){
 				LightNorth = 1;
 			}
-			if((readBytes&6)==4){
+			if((readBytes&12)==4){
 				LightSouth = 1;
 			}
-			if((readBytes&6)==8){
+			if((readBytes&12)==8){
 				LightSouth = 0;
 			}
 //			GUI(NULL);
