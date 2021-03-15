@@ -37,27 +37,45 @@ void emptyCurrent(Controller *self, int num){
 	currentQ = self->currentQ;
 	int northEmpty = SYNC(self->northbound, isEmpty, NULL);
 	int southEmpty = SYNC(self->southbound, isEmpty, NULL);
-	if(northEmpty == 0 || southEmpty == 0){
-	if(currentQ->direction==1){
-		self->currentQ = self->northbound;
-		ASYNC(self->southbound, redLight, NULL);
-		AFTER(SEC(5), self->northbound, greenLight, NULL);
-	}else{
-		self->currentQ = self->southbound;
-		ASYNC(self->northbound, redLight, NULL);
-		AFTER(SEC(5), self->southbound, greenLight, NULL);
-	}
-	currentQ = self->currentQ;
-	if(currentQ->length>10){
-		bl = 10;
-	}else{
-		bl = currentQ->length;
-	}
-	AFTER(SEC(5 + bl), self, emptyCurrent, NULL);
+	if(northEmpty == 0 && southEmpty == 0){
+		if(currentQ->direction==1){
+			self->currentQ = self->northbound;
+			ASYNC(self->southbound, redLight, NULL);
+			AFTER(SEC(5), self->northbound, greenLight, NULL);
+		}else{
+			self->currentQ = self->southbound;
+			ASYNC(self->northbound, redLight, NULL);
+			AFTER(SEC(5), self->southbound, greenLight, NULL);
+		}
+		currentQ = self->currentQ;
+		if(currentQ->length>10){
+			bl = 10;
+		}else{
+			bl = currentQ->length;
+		}
+		AFTER(SEC(5 + bl), self, emptyCurrent, NULL);
 	}else if((northEmpty && !southEmpty) || (!northEmpty && southEmpty)){
-		
+		if(southEmpty){
+			if(currentQ->direction == 1){
+				self->currentQ = self->northbound;
+				ASYNC(self->southbound, redLight, NULL);
+				while(bridge->carcount > 0){};
+				ASYNC(self->northbound, greenLight, NULL);
+			}else{
+				
+			}
+		}else if(northEmpty){
+			if(currentQ->direction == 0){
+				self->currentQ = self->southbound;
+				ASYNC(self->northbound, redLight, NULL);
+				while(bridge->carcount > 0){};
+				ASYNC(self->southbound, greenLight, NULL);
+			}else{
+				
+			}
+		}
 	}else{
-		
+		AFTER(SEC(1), self emptyCurrent, NULL);
 	}
 	
 }

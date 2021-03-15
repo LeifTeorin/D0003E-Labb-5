@@ -22,6 +22,14 @@ void carLeavesQueue(CarQueue *self, int num){
 	ASYNC(self->bridge, carEnters, NULL);
 	int args[2] = {(self->direction)*4, self->length};
 	ASYNC(self->gui, printAt, args);
+	self->counter++
+	if(self->counter>9 || self->length == 0){
+		redLight(self, NULL);
+		self->counter = 0;
+	}else{
+		redLight(self, NULL);
+		AFTER(SEC(1), self, greenLight, NULL);
+	}
 }
 
 void emptyQueue(CarQueue *self, int num){

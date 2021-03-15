@@ -166,9 +166,7 @@ void *readPort(void *arg)
 		int readBytes = read(yeet, &c, sizeof(c));
 		if(readBytes > 0)
 		{
-			printf("%d", (int)c);
-			printf("\n");
-			break;
+			
 		}
 	}
 }
@@ -188,26 +186,23 @@ void Input(void *arg)
 	char c;
 	//Keyboard inputs
 	// hÃ¤r ska vi kÃ¶ra select tror jag
-	int retval = 1; // select(1, &stdin, yeet, NULL, NULL);
-//	do
-	if(retval){
+	while(1){
 		c = getchar();
+
 		if(c == 'n'){
-			printf("%c", c);
-			writePort(0xFF);
+			northQ++;
+			writePort(1);
+		}
+
+		if(c == 's'){
+			southQ++;
+			writePort(4);
+		}
+
+		if(c == 'e'){
+
 		}
 	}
-	/*{
-	if(c == 'n')
-	{
-		arrivalSensor(1);
-		writePort();
-	}
-	else if (c == 's')
-	{
-		arrivalSensor(0);
-		writePort();
-	}while((c=getchar()) != 'q')*/
 }
 
 //Uppdatera bron och se om det finns nï¿½got pï¿½ den
@@ -222,33 +217,33 @@ void enterBridge()
 
 void GUI()
 {
-	while(1)
+		//Cleara skï¿½rmen?
+//		printf("\e[1;1H\e[2J");
+	if(LightNorth)
 	{
-		//Cleara skärmen?
-		printf("\e[1;1H\e[2J");
-		if(LightNorth)
-		{
 		printf("North: GREEN");
-		}
-		if(!LightNorth)
-		{
+	}
+	if(!LightNorth)
+	{
 		printf("North: RED");
-		}
-		printf("\n");
-		printf("NorthQ: %d", NorthQ);
-		printf("\n");
-		if(LightSouth)
-		{
+	}
+	printf("\n");
+	printf("NorthQ: %d", NorthQ);
+	printf("\n");
+	if(LightSouth)
+	{
 		printf("South: GREEN");
-		}
-		if(!LightSouth)
-		{
+	}
+	if(!LightSouth)
+	{
 		printf("South: RED");
-		}
-		printf("\n");
-		printf("SouthQ: %d", SouthQ);
-		printf("\n");
-		msleep(100);
+	}
+	printf("\n");
+	printf("SouthQ: %d", SouthQ);
+	printf("\n");
+	msleep(100);
+	if(LightNorth && LightSouth){
+		printf("ohell, nu Ã¤r bÃ¥da grÃ¶na");
 	}
 }
 
@@ -281,6 +276,7 @@ void simulator(void){
 
 		if(LightNorth && (northQ > 0)){
 			northQ--;
+			GUI();
 			pthread_t cartobridge;
 			pthread_create(&cartobridge, NULL, enterBridge, NULL);
 			entrySensor(1);
@@ -291,6 +287,7 @@ void simulator(void){
 
 		if(LightSouth && (southQ > 0)){
 			southQ--;
+			GUI();
 			pthread_t cartobridge;
 			pthread_create(&cartobridge, NULL, enterBridge, NULL);
 //			enterBridge();
@@ -298,9 +295,6 @@ void simulator(void){
 			sleep(1);
 		}
 
-		if(LightNorth && LightSouth){
-			printf("ohell, nu Ã¤r bÃ¥da grÃ¶na");
-		}
 	}
 }
 
@@ -308,10 +302,11 @@ void* Simulator(void *arg)
 {
 	while(1)
 	{
-		//Då söder ljus är grön (1) och det finns bilar i kön
+		//Dï¿½ sï¿½der ljus ï¿½r grï¿½n (1) och det finns bilar i kï¿½n
 		while( (SouthQ > 0) && LightSouth == 1 && LightNorth != 1)
 		{
 			SouthQ--;
+			GUI();
 			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
 			writePort(0x8);
@@ -320,6 +315,7 @@ void* Simulator(void *arg)
 		while( (NorthQ > 0) && LightNorth == 1 && LightSouth != 1)
 		{
 			SouthQ--;
+			GUI();
 			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
 			writePort(0x2);
@@ -334,8 +330,10 @@ void* Simulator(void *arg)
 void* updateBridge(void *arg)
 {
 	bridgecnt++;
+	GUI();
 	sleep(5);
 	bridgecnt--;
+	GUI();
 	pthread_exit(0);
 }
 
