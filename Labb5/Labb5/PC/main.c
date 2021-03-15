@@ -129,8 +129,8 @@ int openPort()
 		return -1;
 	}
 
-
-	tcflush(fd, TCIFLUSH); //Flush COM1 recieved data that is not read
+	//Flush COM1 recieved data that is not read
+	tcflush(fd, TCIFLUSH); 
 	//Baud rate(signal changes per second) = 9600 | 
 	//Character size mask 8 | 
 	//Set two stop bits rather than one | 
@@ -268,6 +268,7 @@ void entrySensor(int dir)
 	}
 }
 
+/*
 void simulator(void){
 	northQ = 0;
 	southQ = 0;
@@ -296,9 +297,12 @@ void simulator(void){
 		}
 
 	}
-}
+}*/
 
-void* Simulator(void *arg)
+//SIMULATOR IS MY PROPERTY
+//TRESPASSERS WILL BE SHOT ON SIGHT
+//BEGONE MEDDLERS
+void Simulator(void)
 {
 	while(1)
 	{
@@ -309,6 +313,7 @@ void* Simulator(void *arg)
 			GUI();
 			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
+			entrySensor(1);
 			writePort(0x8);
 			sleep(1);
 		}
@@ -318,6 +323,7 @@ void* Simulator(void *arg)
 			GUI();
 			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
+			entrySensor(0);
 			writePort(0x2);
 			sleep(1);
 		}
@@ -375,54 +381,16 @@ void arrivalSensor(int dir)
 int main(void)
 {
 	yeet = openPort();
-	uint8_t z = 15;
-//	pthread_create(&readz, NULL, readPort, &z);
-	char f = getchar();
-	int fz;
-	switch((int)f)
-	{
-		case((int)'1'):
-			fz = 1;
-			break;
-		case((int)'2'):
-			fz = 2;
-			break;
-		case((int)'3'):
-			fz = 3;
-			break;
-		case((int)'4'):
-			fz = 4;
-			break;
-		case((int)'5'):
-			fz = 5;
-			break;
-		case((int)'6'):
-			fz = 6;
-			break;
-		case((int)'7'):
-			fz = 7;
-			break;
-		case((int)'8'):
-			fz = 8;
-			break;
-		case((int)'9'):
-			fz = 9;
-			break;
-		default:
-			fz = 0;
-			break;
-	}
-	writePort(fz);
-	readPort(&z);
-	/*int x = write(yeet, &z, 1);
-	printf("x = %d",x);
-	printf("\n");
-	if(x<0)
-	{
-		printf("oheeeeell\n");
-	}
-	*/
-//	readPort(&z);
 	
-}
+	pthread_t rP;
+	pthread_t inp;
+	pthread_t simp;
 
+	if(pthread_create(&rP, NULL, readPort, NULL)){printf("FAIL ON: readPort");}
+	if(pthread_create(&inp, NULL, Input, NULL)){printf("FAIL ON: Input");}
+	if(pthread_create(&simp, NULL, Simulator, NULL)){printf("FAIL ON: Simulator");}
+
+	//pthread_join(rP, NULL);
+	//pthread_join(inp, NULL);
+	//pthread_join(simp, NULL);
+}
