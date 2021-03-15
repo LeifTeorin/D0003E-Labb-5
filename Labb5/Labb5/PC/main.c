@@ -23,7 +23,6 @@ Likewise, we will use the transmitter side of the USART for implementing the fou
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "Simulator.h"
 
 
 #define SERIAL_PORT "/dev/ttyS0"
@@ -39,9 +38,9 @@ int yeet; // yeet blir vår filedescriptor tror jag
 int LightNorth; //0 = Röd; 1 = Grön.
 int LightSouth; //0 = Röd; 1 = Grön.
 int writeBit[4] = {0, 0, 0, 0};
-northQ = 0;
-southQ = 0;
-bridgecnt = 0;
+int NorthQ = 0;
+int SouthQ = 0;
+int Bridgecnt = 0;
 int speed = 96000;
 enum Z light = RED;
 pthread_t readinputs;
@@ -53,6 +52,41 @@ Bit 1: Northbound red light status
 Bit 2: Southbound green light status
 Bit 3: Southbound red light status
 */
+void *GUI(void *arg)
+{
+		//Cleara sk�rmen?
+//		
+	while(1)
+	{
+		printf("\e[1;1H\e[2J");
+		if(LightNorth)
+		{
+			printf("North: GREEN");
+		}
+		if(!LightNorth)
+		{
+			printf("North: RED");
+		}
+		printf("\n");
+		printf("NorthQ: %d", NorthQ);
+		printf("\n");
+		if(LightSouth)
+		{
+			printf("South: GREEN");
+		}
+		if(!LightSouth)
+		{
+			printf("South: RED");
+		}
+		printf("\n");
+		printf("SouthQ: %d", SouthQ);
+		printf("\n");
+		usleep(1000000);
+		if(LightNorth && LightSouth){
+			printf("ohell, nu är båda gröna");
+		}
+	}
+}
 
 int openPort()
 {
@@ -166,7 +200,19 @@ void *readPort(void *arg)
 		int readBytes = read(yeet, &c, sizeof(c));
 		if(readBytes > 0)
 		{
-			
+			if((readBytes&3)==2){
+				LightNorth = 0;
+			}
+			if((readBytes&3)==1){
+				LightNorth = 1;
+			}
+			if((readBytes&6)==4){
+				LightSouth = 1;
+			}
+			if((readBytes&6)==8){
+				LightSouth = 0;
+			}
+//			GUI(NULL);
 		}
 	}
 }
@@ -181,7 +227,7 @@ void writePort(uint8_t data)
 	}
 }
 
-void Input(void *arg)
+void *Input(void *arg)
 {
 	char c;
 	//Keyboard inputs
@@ -190,12 +236,12 @@ void Input(void *arg)
 		c = getchar();
 
 		if(c == 'n'){
-			northQ++;
+			NorthQ++;
 			writePort(1);
 		}
 
 		if(c == 's'){
-			southQ++;
+			SouthQ++;
 			writePort(4);
 		}
 
@@ -208,44 +254,14 @@ void Input(void *arg)
 //Uppdatera bron och se om det finns n�got p� den
 void enterBridge()
 {
-	bridgecnt++;
+	Bridgecnt++;
 	// do some gui magic
 	// skriv till avr
 	sleep(5);
-	bridgecnt--;
+	Bridgecnt--;
 }
 
-void GUI()
-{
-		//Cleara sk�rmen?
-//		printf("\e[1;1H\e[2J");
-	if(LightNorth)
-	{
-		printf("North: GREEN");
-	}
-	if(!LightNorth)
-	{
-		printf("North: RED");
-	}
-	printf("\n");
-	printf("NorthQ: %d", NorthQ);
-	printf("\n");
-	if(LightSouth)
-	{
-		printf("South: GREEN");
-	}
-	if(!LightSouth)
-	{
-		printf("South: RED");
-	}
-	printf("\n");
-	printf("SouthQ: %d", SouthQ);
-	printf("\n");
-	msleep(100);
-	if(LightNorth && LightSouth){
-		printf("ohell, nu är båda gröna");
-	}
-}
+
 
 
 /*
@@ -266,6 +282,14 @@ void entrySensor(int dir)
 		writeBit[1] = 0;
 		writeBit[3] = 1;
 	}
+}
+
+void* updateBridge(void *arg)
+{
+	Bridgecnt++;
+	sleep(5);
+	Bridgecnt--;
+	pthread_exit(0);
 }
 
 /*
@@ -302,7 +326,7 @@ void simulator(void){
 //SIMULATOR IS MY PROPERTY
 //TRESPASSERS WILL BE SHOT ON SIGHT
 //BEGONE MEDDLERS
-void Simulator(void)
+void *Simulator(void *arg)
 {
 	while(1)
 	{
@@ -310,7 +334,6 @@ void Simulator(void)
 		while( (SouthQ > 0) && LightSouth == 1 && LightNorth != 1)
 		{
 			SouthQ--;
-			GUI();
 			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
 			entrySensor(1);
@@ -320,7 +343,6 @@ void Simulator(void)
 		while( (NorthQ > 0) && LightNorth == 1 && LightSouth != 1)
 		{
 			SouthQ--;
-			GUI();
 			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
 			entrySensor(0);
@@ -331,16 +353,6 @@ void Simulator(void)
 		//flusha bort output buffern
 		fflush(stdin);
 	}
-}
-
-void* updateBridge(void *arg)
-{
-	bridgecnt++;
-	GUI();
-	sleep(5);
-	bridgecnt--;
-	GUI();
-	pthread_exit(0);
 }
 
 /*
@@ -381,15 +393,17 @@ void arrivalSensor(int dir)
 int main(void)
 {
 	yeet = openPort();
-	
 	pthread_t rP;
 	pthread_t inp;
 	pthread_t simp;
+
 
 	if(pthread_create(&rP, NULL, readPort, NULL)){printf("FAIL ON: readPort");}
 	if(pthread_create(&inp, NULL, Input, NULL)){printf("FAIL ON: Input");}
 	if(pthread_create(&simp, NULL, Simulator, NULL)){printf("FAIL ON: Simulator");}
 
+	
+	GUI(NULL);
 	//pthread_join(rP, NULL);
 	//pthread_join(inp, NULL);
 	//pthread_join(simp, NULL);
