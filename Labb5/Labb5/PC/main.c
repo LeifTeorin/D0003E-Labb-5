@@ -203,37 +203,11 @@ void *readPort(void *arg)
 		int readBytes = read(yeet, &c, sizeof(c));
 		if(readBytes > 0)
 		{
-			if((readBytes&3)==äå){
-				LightNorth = 0;
-			}
-			if((readBytes&3)==1){
-				LightNorth = 1;
-			}
-			if((readBytes&12)==4){
-				LightSouth = 1;
-			}
-			if((readBytes&12)==8){
-				LightSouth = 0;
-			}
+			LightNorth = (c & 1);
+			LightSouth = (c >> 2)&1;
 		}
 	}
 }
-//			GUI(NULL);
-/*uint8_t c;
-
-	while (1) 
-	{
-		int signal = read(yeet, &c, sizeof(c));
-
-		if (signal > 0) {
-
-			if((c & (1 << 0)) >> 0){LightNorth = 1;}
-			else if((c & (1 << 1)) >> 1){LightNorth = 0;}
-			if((c & (1 << 2)) >> 2){LightSouth = 1;}
-			else if((c & (1 << 3)) >> 3){LightSouth = 0;}
-		}
-	}
-}*/
 
 void writePort(uint8_t data)
 {
