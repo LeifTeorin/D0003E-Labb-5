@@ -59,6 +59,7 @@ void *GUI(void *arg)
 	while(1)
 	{
 		printf("\e[1;1H\e[2J");
+		//printf("\n");
 		if(LightNorth)
 		{
 			printf("North: GREEN");
@@ -80,6 +81,8 @@ void *GUI(void *arg)
 		}
 		printf("\n");
 		printf("SouthQ: %d", SouthQ);
+		printf("\n");
+		printf("Bridge: %d", Bridgecnt);
 		printf("\n");
 		usleep(1000000);
 		if(LightNorth && LightSouth){
@@ -200,7 +203,7 @@ void *readPort(void *arg)
 		int readBytes = read(yeet, &c, sizeof(c));
 		if(readBytes > 0)
 		{
-			if((readBytes&3)==2){
+			if((readBytes&3)==äå){
 				LightNorth = 0;
 			}
 			if((readBytes&3)==1){
@@ -212,14 +215,30 @@ void *readPort(void *arg)
 			if((readBytes&12)==8){
 				LightSouth = 0;
 			}
-//			GUI(NULL);
 		}
 	}
 }
+//			GUI(NULL);
+/*uint8_t c;
+
+	while (1) 
+	{
+		int signal = read(yeet, &c, sizeof(c));
+
+		if (signal > 0) {
+
+			if((c & (1 << 0)) >> 0){LightNorth = 1;}
+			else if((c & (1 << 1)) >> 1){LightNorth = 0;}
+			if((c & (1 << 2)) >> 2){LightSouth = 1;}
+			else if((c & (1 << 3)) >> 3){LightSouth = 0;}
+		}
+	}
+}*/
 
 void writePort(uint8_t data)
 {
-	int bytes_written = write(yeet, &data, 1);
+	uint8_t x = data;
+	int bytes_written = write(yeet, &x, 1);
 	if(yeet < 0)
 	{
 		//Om det inte gick att printa datan
@@ -227,7 +246,7 @@ void writePort(uint8_t data)
 	}
 }
 
-void *Input(void *arg)
+int *Input(void *arg)
 {
 	char c;
 	//Keyboard inputs
@@ -331,27 +350,25 @@ void *Simulator(void *arg)
 	while(1)
 	{
 		//D� s�der ljus �r gr�n (1) och det finns bilar i k�n
-		while( (SouthQ > 0) && LightSouth == 1 && LightNorth != 1)
+		if( (SouthQ > 0) && LightSouth == 1)
 		{
 			SouthQ--;
 			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
-			entrySensor(1);
-			writePort(0x8);
+			writePort(8);
 			sleep(1);
 		}
-		while( (NorthQ > 0) && LightNorth == 1 && LightSouth != 1)
+		if( (NorthQ > 0) && LightNorth == 1)
 		{
-			SouthQ--;
+			NorthQ--;
 			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
-			entrySensor(0);
-			writePort(0x2);
+			writePort(2);
 			sleep(1);
 		}
 		//0x8 ska vara south, 0x2 ska vara north.
 		//flusha bort output buffern
-		fflush(stdin);
+		//fflush(stdin);
 	}
 }
 
@@ -394,17 +411,16 @@ int main(void)
 {
 	yeet = openPort();
 	pthread_t rP;
-	pthread_t inp;
+	pthread_t ui;
 	pthread_t simp;
 
 
 	if(pthread_create(&rP, NULL, readPort, NULL)){printf("FAIL ON: readPort");}
-	if(pthread_create(&inp, NULL, Input, NULL)){printf("FAIL ON: Input");}
+	if(pthread_create(&ui, NULL, GUI, NULL)){printf("FAIL ON: Input");}
 	if(pthread_create(&simp, NULL, Simulator, NULL)){printf("FAIL ON: Simulator");}
 
 	
-	GUI(NULL);
-	//pthread_join(rP, NULL);
+	return Input(NULL);
 	//pthread_join(inp, NULL);
 	//pthread_join(simp, NULL);
 }
