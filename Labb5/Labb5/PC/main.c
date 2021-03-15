@@ -39,22 +39,14 @@ int yeet; // yeet blir vår filedescriptor tror jag
 int LightNorth; //0 = Röd; 1 = Grön.
 int LightSouth; //0 = Röd; 1 = Grön.
 int writeBit[4] = {0, 0, 0, 0};
-int southQ;
-int northQ;
-int bridgecnt;
+northQ = 0;
+southQ = 0;
+bridgecnt = 0;
 int speed = 96000;
 enum Z light = RED;
 pthread_t readinputs;
 pthread_t sim;
 pthread_t readinputs;
-
-/*void openPort()
-{
-	//Open serial port
-	//yeet = open(SERIAL_PORT)
-}
-*/
-
 /*
 Bit 0: Northbound green light status
 Bit 1: Northbound red light status
@@ -139,9 +131,16 @@ int openPort()
 
 
 	tcflush(fd, TCIFLUSH); //Flush COM1 recieved data that is not read
-	//Baud rate(signal changes per second) = 9600 | Character size mask 8 | Set two stop bits rather than one | Enable receiver | Ignore modem control lines | Lower modem control lines after last process closes the device (hang up) | Enable input parity checking
+	//Baud rate(signal changes per second) = 9600 | 
+	//Character size mask 8 | 
+	//Set two stop bits rather than one | 
+	//Enable receiver | 
+	//Ignore modem control lines | 
+	//Lower modem control lines after last process closes the device (hang up) | 
+	//Enable input parity checking
 	termios_p.c_cflag = B9600 | CS8 | CSTOPB | CREAD | CLOCAL | HUPCL | INPCK;
-	// NOT (Echo input characters | echo the NL character even if ECHO is not set)
+	// NOT (Echo input characters |
+	//echo the NL character even if ECHO is not set)
 	termios_p.c_lflag &= ~(ECHO | ECHONL | ICANON);
 	// Avoid inter-message overlap.
 	termios_p.c_cc[VTIME] = 10;
@@ -165,14 +164,11 @@ void *readPort(void *arg)
 	while(1)
 	{
 		int readBytes = read(yeet, &c, sizeof(c));
-		//	uint8_t signal = 0;
 		if(readBytes > 0)
 		{
 			printf("%d", (int)c);
 			printf("\n");
 			break;
-			//printf("%d", readBytes);
-			//printf("\n");
 		}
 	}
 }
@@ -180,22 +176,11 @@ void *readPort(void *arg)
 void writePort(uint8_t data)
 {
 	int bytes_written = write(yeet, &data, 1);
-//	int yeet = printf(yeet, &data, sizeof(data));
 	if(yeet < 0)
 	{
 		//Om det inte gick att printa datan
 		printf("OHELL");
 	}
-}
-
-void Display()
-{
-	//Displaya p� datorn vad som h�nder
-	printf("(1 = gr�n, 0 = r�d)\n");
-	printf("North: ", LightNorth);
-	printf("South: ", LightSouth);
-	printf("Northbound cars");
-	printf("Southbound cars");
 }
 
 void Input(void *arg)
@@ -239,7 +224,6 @@ void GUI()
 {
 	while(1)
 	{
-
 		//Cleara sk�rmen?
 		printf("\e[1;1H\e[2J");
 		if(LightNorth)
@@ -342,6 +326,7 @@ void* Simulator(void *arg)
 			sleep(1);
 		}
 		//0x8 ska vara south, 0x2 ska vara north.
+		//flusha bort output buffern
 		fflush(stdin);
 	}
 }
@@ -354,6 +339,22 @@ void* updateBridge(void *arg)
 	pthread_exit(0);
 }
 
+/*
+//returnar 1 om tom
+int checkBridge()
+{
+	if(bridgecnt > 0)
+	{
+		printf("Someone's on the bridge you guys\n");
+		return 0;
+	}
+	else
+	{
+		printf("Tomt");
+		return 1;
+	}
+}
+*/
 /*
 Om n�gon kommer till bron
 Bit 0: Northbound car arrival sensor activated
