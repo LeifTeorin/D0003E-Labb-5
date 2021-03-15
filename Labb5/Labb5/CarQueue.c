@@ -21,15 +21,16 @@ void carLeavesQueue(CarQueue *self, int num){
 //	self->light = 0;
 	ASYNC(self->bridge, carEnters, NULL);
 	int args[2] = {(self->direction)*4, self->length};
-	ASYNC(self->gui, printAt, args);
-	self->counter++
-	if(self->counter>9 || self->length == 0){
+	SYNC(self->gui, printAt, args);
+	self->counter++;
+	/*if(self->counter>9 || self->length == 0){
 		redLight(self, NULL);
 		self->counter = 0;
 	}else{
-		redLight(self, NULL);
+		ASYNC(self, redLight, NULL);
 		AFTER(SEC(1), self, greenLight, NULL);
 	}
+	*/
 }
 
 void emptyQueue(CarQueue *self, int num){
@@ -39,7 +40,7 @@ void emptyQueue(CarQueue *self, int num){
 			self->length--;
 			ASYNC(self->bridge, carEnters, NULL);
 			int args[2] = {(self->direction)*4, self->length};
-			ASYNC(self->gui, printAt, args);
+			SYNC(self->gui, printAt, args);
 			(self->counter)++;
 		}else{
 			self->light = 0;
@@ -72,16 +73,32 @@ void carArrives(CarQueue *self, int num){
 	int test = self->length;
 	int pos = self->direction;
 	self->length++;
-	int args[2] = {4*pos, test + 1};
+	int args[2] = {4*pos, self->length};
 	SYNC(self->gui, printAt, args);
 }
 
 void greenLight(CarQueue *self, int num){
 	self->light = 1;
-	ASYNC(self->writer, writeToPort, (1<<2*((self->direction)))); // skickar 01 binärt
+//	int writebits = (1<<(2*(self->direction)));
+/*
+	if(self->direction==1){
+		ASYNC(self->writer, updateSouth, 1);
+	}else{
+		ASYNC(self->writer, updateNorth, 1);
+	}
+*/
+//	ASYNC(self->writer, updateBits, bits); // skickar 01 binärt
 }
 
 void redLight(CarQueue *self, int num){
 	self->light = 0;
-	ASYNC(self->writer, writeToPort, (2<<(2*(self->direction)))); //skickar 10 binärt 
+//	int writebits = (2<<(2*(self->direction)));
+/*
+	if(self->direction==1){
+		ASYNC(self->writer, updateSouth, 2);
+	}else{
+		ASYNC(self->writer, updateNorth, 2);
+	}
+*/
+//	ASYNC(self->writer, updateBits, writebits); //skickar 10 binärt 
 }

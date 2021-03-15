@@ -2,6 +2,7 @@
 #include "Controller.h"
 #include "CarQueue.h"
 #include "TinyTimber.h"
+#include "PortWriter.h"
 
 void emptyCurrent(Controller *self, int num){
 	/*if(self->currentQ->length==0){
@@ -31,10 +32,12 @@ void emptyCurrent(Controller *self, int num){
 	CarQueue *currentQ;
 	CarQueue *northQ;
 	CarQueue *southQ;
+	Bridge *bridge;
 	int bl;
 	northQ = self->northbound;
 	southQ = self->southbound;
 	currentQ = self->currentQ;
+	bridge = self->bridge;
 	int northEmpty = SYNC(self->northbound, isEmpty, NULL);
 	int southEmpty = SYNC(self->southbound, isEmpty, NULL);
 	if(northEmpty == 0 && southEmpty == 0){
@@ -62,41 +65,70 @@ void emptyCurrent(Controller *self, int num){
 				while(bridge->carcount > 0){};
 				ASYNC(self->northbound, greenLight, NULL);
 			}else{
-				
+				AFTER(SEC(1), self->northbound, greenLight, NULL);
 			}
 		}else if(northEmpty){
 			if(currentQ->direction == 0){
 				self->currentQ = self->southbound;
 				ASYNC(self->northbound, redLight, NULL);
-				while(bridge->carcount > 0){};
+				while(bridge->carcount > 0){};// vänta på att bron blir tom
 				ASYNC(self->southbound, greenLight, NULL);
 			}else{
-				
+				AFTER(SEC(1), self->southbound, greenLight, NULL);
 			}
+			currentQ = self->currentQ;
+			if(currentQ->length>10){
+				bl = 10;
+			}else{
+				bl = currentQ->length;
+			}
+			AFTER(SEC(5 + bl), self, emptyCurrent, NULL);
 		}
 	}else{
-		AFTER(SEC(1), self emptyCurrent, NULL);
+		AFTER(SEC(1), self, emptyCurrent, NULL);
 	}
 	
 }
 
 void switchLights(Controller *self, int origin){
+	/*CarQueue *sBound;
+	sBound = self->southbound;
+	CarQueue *nBound;
+	nBound = self->northbound;
 	if(origin == 1){
-		CarQueue *nBound;
-		nBound = self->northbound;
 		if(nBound->length > 0){
 			AFTER(SEC(5), self->northbound, greenLight, NULL);
 			self->currentQ = self->northbound;
+			}else if(sBound->length>0){
+			AFTER(SEC(1), self->southbound, greenLight, NULL);
+			}else{
+			
 		}
 	}
 	if(origin == 0){
-		CarQueue *sBound;
-		sBound = self->southbound;
+		
 		if(sBound->length > 0){
 			AFTER(SEC(5), self->southbound, greenLight, NULL);
 			self->currentQ = self->southbound;
 		}
+	}*/
+	
+	if(self->curr==1){
+//		self->currentQ = self->northbound;
+		self->curr = 0;
+	//	ASYNC(self->southbound, redLight, NULL);
+		ASYNC(self->writer, redred, NULL);
+		AFTER(SEC(5), self->writer, redgreen, NULL);
+	//	AFTER(SEC(5), self->northbound, greenLight, NULL);
+	}else{
+//		self->currentQ = self->southbound;
+		self->curr = 1;
+	//	ASYNC(self->northbound, redLight, NULL);
+		ASYNC(self->writer, redred, NULL);
+		AFTER(SEC(5), self->writer, greenred, NULL);
+	//	AFTER(SEC(5), self->southbound, greenLight, NULL);
 	}
+	AFTER(SEC(9), self, switchLights, NULL);
 }
 
 void startEmptying(Controller *self, int origin){
@@ -114,8 +146,8 @@ void startEmptying(Controller *self, int origin){
 			ASYNC(self->currentQ, greenLight, NULL);
 		}else{
 			self->currentQ = self->southbound;
-			int carcnt = bridge->carcount;
-			while(carcnt > 0){
+//			int carcnt = bridge->carcount;
+			while(bridge->carcount > 0){
 				
 			}
 			ASYNC(self->currentQ, greenLight, NULL);

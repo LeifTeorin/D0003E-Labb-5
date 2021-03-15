@@ -12,29 +12,26 @@ void inputs(InputHandler *self){
 	if(recieved&1 == 1){ // northbound car arrival
 		ASYNC(self->nBound, carArrives, NULL);
 	}
-	if((recieved>>1)&1 == 1){ // northbound enters bridge
+	if(recieved&2){ // northbound enters bridge
 		ASYNC(self->nBound, carLeavesQueue, NULL);
 	}
-	if((recieved>>2)&1 == 1){
+	if(recieved&4){
 		ASYNC(self->sBound, carArrives, NULL);
 	}
-	if((recieved>>3)&1 == 1){
+	if(recieved&8){
 		ASYNC(self->sBound, carLeavesQueue, NULL);
 	}
-	/*
-	int args[2] = {0, recieved+10};
-//	ASYNC(self->gui, printAt, args);
-	printAt(self->gui, args);
-	while ((UCSR0A & (1 << UDRE0)) == 0) {};
-	UDR0 = recieved + 100;
-	*/
 }
 
 void testInputs(InputHandler *self){
 	if((PINE&0x04)==0){
-		ASYNC(self->controller, addNorth, NULL);
+		//ASYNC(self->controller, addNorth, NULL);
+		//ASYNC(self->nBound, greenLight, NULL);
+		UDR0 = 9;
 	}
 	if((PINE&0x08)==0){
-		ASYNC(self->controller, addSouth, NULL);
+		//ASYNC(self->controller, addSouth, NULL);
+		ASYNC(self->sBound, greenLight, NULL);
+		UDR0 = 6;
 	}
 }

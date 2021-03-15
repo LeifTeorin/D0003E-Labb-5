@@ -2,6 +2,9 @@
 #define _CONTROLLER_
 
 #include "TinyTimber.h"
+#include "CarQueue.h"
+#include "Bridge.h"
+#include "PortWriter.h"
 
 typedef struct{
 	Object super;
@@ -9,12 +12,13 @@ typedef struct{
 	struct CarQueue *northbound;
 	struct CarQueue *southbound;
 	struct CarQueue *currentQ;
+	struct PortWriter *writer;
 	int counter;
 	int curr;
 }Controller;
 
-#define initController(bridge, northB, southB)\
-	{initObject(), bridge, northB, southB, NULL, 0}
+#define initController(bridge, northB, southB, writer)\
+	{initObject(), bridge, northB, southB, northB, writer, 0, 0}
 
 void switchQueue(Controller *self, int num);
 void emptyCurrent(Controller *self, int num);

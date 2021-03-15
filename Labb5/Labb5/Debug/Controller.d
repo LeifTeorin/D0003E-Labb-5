@@ -11,7 +11,7 @@ Controller.d Controller.o: .././Controller.c \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\fuse.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\lock.h \
  .././Controller.h .././TinyTimber.h .././CarQueue.h .././Bridge.h \
- .././GUI.h
+ .././GUI.h .././PortWriter.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -44,3 +44,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 .././Bridge.h:
 
 .././GUI.h:
+
+.././PortWriter.h:
