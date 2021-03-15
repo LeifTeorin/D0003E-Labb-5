@@ -235,6 +235,39 @@ void enterBridge()
 	bridgecnt--;
 }
 
+void GUI()
+{
+	while(1)
+	{
+
+		//Cleara skärmen?
+		printf("\e[1;1H\e[2J");
+		if(LightNorth)
+		{
+		printf("North: GREEN");
+		}
+		if(!LightNorth)
+		{
+		printf("North: RED");
+		}
+		printf("\n");
+		printf("NorthQ: %d", NorthQ);
+		printf("\n");
+		if(LightSouth)
+		{
+		printf("South: GREEN");
+		}
+		if(!LightSouth)
+		{
+		printf("South: RED");
+		}
+		printf("\n");
+		printf("SouthQ: %d", SouthQ);
+		printf("\n");
+		msleep(100);
+	}
+}
+
 
 /*
 Om nÃ¥got Ã¥ker in i bron
@@ -285,6 +318,40 @@ void simulator(void){
 			printf("ohell, nu Ã¤r bÃ¥da grÃ¶na");
 		}
 	}
+}
+
+void* Simulator(void *arg)
+{
+	while(1)
+	{
+		//Då söder ljus är grön (1) och det finns bilar i kön
+		while( (SouthQ > 0) && LightSouth == 1 && LightNorth != 1)
+		{
+			SouthQ--;
+			pthread_t drive;
+			pthread_create(&drive, NULL, updateBridge, NULL);
+			writePort(0x8);
+			sleep(1);
+		}
+		while( (NorthQ > 0) && LightNorth == 1 && LightSouth != 1)
+		{
+			SouthQ--;
+			pthread_t drive;
+			pthread_create(&drive, NULL, updateBridge, NULL);
+			writePort(0x2);
+			sleep(1);
+		}
+		//0x8 ska vara south, 0x2 ska vara north.
+		fflush(stdin);
+	}
+}
+
+void* updateBridge(void *arg)
+{
+	bridgecnt++;
+	sleep(5);
+	bridgecnt--;
+	pthread_exit(0);
 }
 
 /*
