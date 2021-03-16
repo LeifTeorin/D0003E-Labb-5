@@ -31,6 +31,7 @@ int Bridgecnt = 0;
 pthread_t rP;
 pthread_t ui;
 pthread_t simp;
+pthread_t drive;
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 
 void *GUI(void *arg)
@@ -149,8 +150,8 @@ void *readPort(void *arg)
 void writePort(uint8_t data)
 {
 	uint8_t x = data;
-	pthread_create(&ui, NULL, GUI, NULL);
 	int bytes_written = write(fd, &x, 1);
+	pthread_create(&ui, NULL, GUI, NULL);
 	if(fd < 0)
 	{
 		//Om det inte gick att printa datan
@@ -190,28 +191,39 @@ void* updateBridge(void *arg)
 	pthread_create(&ui, NULL, GUI, NULL);
 	sleep(5);
 	Bridgecnt--;
+	pthread_create(&ui, NULL, GUI, NULL);
 	pthread_exit(0);
 }
 
 void *Simulator(void *arg)
 {
+	//Synka rasistiska funktioner.
+	int allowNorth = 1;
+	int allowSouth = 1;
+	
 	while(1)
 	{
-		if( (SouthQ > 0) && LightSouth == 1)
+		if( (SouthQ > 0) && LightSouth && allowSouth)
 		{
 			SouthQ--;
-			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
 			writePort(8);
-			sleep(1);
+			allowSouth = 0;
 		}
-		if( (NorthQ > 0) && LightNorth == 1)
+		if( (NorthQ > 0) && LightNorth && allowNorth)
 		{
 			NorthQ--;
-			pthread_t drive;
 			pthread_create(&drive, NULL, updateBridge, NULL);
 			writePort(2);
-			sleep(1);
+			allowNorth = 0;
+		}
+		if(!LightNorth && !allowNorth)
+		{
+			allowNorth = 1;
+		}
+		if(!LightSouth && !allowSouth)
+		{
+			allowSouth = 1;
 		}
 	}
 }
