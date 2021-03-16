@@ -16,11 +16,14 @@ typedef struct{
 //	struct Controller *controller;
 	struct PortWriter *writer;
 	struct GUI *gui;
+	int maxSends;
 }CarQueue;
 
 #define initCarQueue(direction, bridge, writer, gui)\
-{initObject(), 0, 0, direction, 0, bridge, writer, gui}
+{initObject(), 0, 0, direction, 0, bridge, writer, gui, 0}
 	
+void setMax(CarQueue *self, int num);	
+void resetCounter(CarQueue *self, int num);
 void carLeavesQueue(CarQueue *self, int num);
 void carArrives(CarQueue *self, int num);
 void emptyQueue(CarQueue *self, int num);

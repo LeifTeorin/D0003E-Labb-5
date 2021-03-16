@@ -38,17 +38,29 @@ void emptyCurrent(Controller *self, int num){
 	southQ = self->southbound;
 	currentQ = self->currentQ;
 	bridge = self->bridge;
-	int northEmpty = SYNC(self->northbound, isEmpty, NULL);
-	int southEmpty = SYNC(self->southbound, isEmpty, NULL);
-	if(northEmpty == 0 && southEmpty == 0){
-		if(currentQ->direction==1){
+	ASYNC(self->northbound, resetCounter, NULL);
+	ASYNC(self->southbound, resetCounter, NULL);
+	ASYNC(self->northbound, setMax, 0);
+	ASYNC(self->southbound, setMax, 0);
+//	int northEmpty = SYNC(self->northbound, isEmpty, NULL);
+//	int southEmpty = SYNC(self->southbound, isEmpty, NULL);
+	if(northQ->length > 0 && southQ->length > 0){
+		if(self->curr==1){
 			self->currentQ = self->northbound;
-			ASYNC(self->southbound, redLight, NULL);
-			AFTER(SEC(5), self->northbound, greenLight, NULL);
+			self->curr = 0;
+//			ASYNC(self->southbound, redLight, NULL);
+//			AFTER(SEC(5), self->northbound, greenLight, NULL);
+			ASYNC(self->writer, redred, NULL);
+			
+			AFTER(SEC(5), self->writer, redgreen, NULL);
 		}else{
 			self->currentQ = self->southbound;
-			ASYNC(self->northbound, redLight, NULL);
-			AFTER(SEC(5), self->southbound, greenLight, NULL);
+			self->curr = 1;
+//			ASYNC(self->northbound, redLight, NULL);
+//			AFTER(SEC(5), self->southbound, greenLight, NULL);
+			ASYNC(self->writer, redred, NULL);
+			
+			AFTER(SEC(5), self->writer, greenred, NULL);
 		}
 		currentQ = self->currentQ;
 		if(currentQ->length>10){
@@ -56,25 +68,30 @@ void emptyCurrent(Controller *self, int num){
 		}else{
 			bl = currentQ->length;
 		}
+		ASYNC(self->currentQ, setMax, bl);
 		AFTER(SEC(5 + bl), self, emptyCurrent, NULL);
-	}else if((northEmpty && !southEmpty) || (!northEmpty && southEmpty)){
-		if(southEmpty){
-			if(currentQ->direction == 1){
-				self->currentQ = self->northbound;
-				ASYNC(self->southbound, redLight, NULL);
-				while(bridge->carcount > 0){};
-				ASYNC(self->northbound, greenLight, NULL);
+	}else if((northQ->length ==0 && southQ->length > 0) || (northQ->length > 0 && southQ->length == 0)){
+		if(southQ->length == 0){
+			if(self->curr == 1){
+				
+//				ASYNC(self->southbound, redLight, NULL);
+				
+				if(bridge->carcount>0){
+					ASYNC(self->writer, redred,  NULL);
+					AFTER(MSEC(500), self, emptyCurrent, NULL);
+					return;
+				}else{
+					self->curr = 0;
+					self->currentQ = self->northbound;
+					ASYNC(self->writer, redgreen, NULL);
+				}
+/*				while(bridge->carcount > 0){
+					
+				}*/
+//				ASYNC(self->northbound, greenLight, NULL);
 			}else{
-				AFTER(SEC(1), self->northbound, greenLight, NULL);
-			}
-		}else if(northEmpty){
-			if(currentQ->direction == 0){
-				self->currentQ = self->southbound;
-				ASYNC(self->northbound, redLight, NULL);
-				while(bridge->carcount > 0){};// vänta på att bron blir tom
-				ASYNC(self->southbound, greenLight, NULL);
-			}else{
-				AFTER(SEC(1), self->southbound, greenLight, NULL);
+//				ASYNC(self->northbound, greenLight, NULL);
+				ASYNC(self->writer, redgreen, NULL);
 			}
 			currentQ = self->currentQ;
 			if(currentQ->length>10){
@@ -82,10 +99,49 @@ void emptyCurrent(Controller *self, int num){
 			}else{
 				bl = currentQ->length;
 			}
-			AFTER(SEC(5 + bl), self, emptyCurrent, NULL);
+			ASYNC(self->northbound, setMax, bl);
+			AFTER(SEC(bl), self, emptyCurrent, NULL);
+		}else if(northQ->length == 0){
+			if(self->curr == 0){
+				
+//				ASYNC(self->northbound, redLight, NULL);
+
+				if(bridge->carcount>0){
+//					ASYNC(self->writer, redred, NULL);
+					AFTER(MSEC(500), self, emptyCurrent, NULL);
+					return;
+				}else{
+					self->curr = 1;
+					self->currentQ = self->southbound;
+					ASYNC(self->writer, greenred, NULL);
+				}
+				
+				/*while(bridge->carcount > 0){
+					
+					}*/// vänta på att bron blir tom
+//				ASYNC(self->southbound, greenLight, NULL);
+//				ASYNC(self->writer, greenred, NULL);
+			}else{
+//				ASYNC(self->southbound, greenLight, NULL);
+				ASYNC(self->writer, greenred, NULL);
+			}
+			currentQ = self->currentQ;
+			if(currentQ->length>10){
+				bl = 10;
+			}else{
+				bl = currentQ->length;
+			}
+			ASYNC(self->southbound, setMax, bl);
+			AFTER(SEC(bl), self, emptyCurrent, NULL);
 		}
 	}else{
-		AFTER(SEC(1), self, emptyCurrent, NULL);
+//		ASYNC(self->writer, redred, NULL);
+	/*	while(northQ->length==0 && southQ->length == 0){
+			
+		}
+		ASYNC(self, emptyCurrent, NULL);
+		*/
+		AFTER(MSEC(500), self, emptyCurrent, NULL); //kanske kör detta i don't know
 	}
 	
 }

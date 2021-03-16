@@ -8,6 +8,10 @@
 #include <avr/portpins.h>
 #include <stdint.h>
 
+void setMax(CarQueue *self, int num){
+	self->maxSends = num;
+}
+
 int isEmpty(CarQueue *self, int num){
 	if(self->length>0){
 		return 0;
@@ -16,21 +20,34 @@ int isEmpty(CarQueue *self, int num){
 	}
 }
 
+void resetCounter(CarQueue *self, int num){
+	self->counter = 0;
+}
+
 void carLeavesQueue(CarQueue *self, int num){
+	self->counter++;
 	self->length--;
 //	self->light = 0;
 	ASYNC(self->bridge, carEnters, NULL);
 	int args[2] = {(self->direction)*4, self->length};
 	SYNC(self->gui, printAt, args);
-	self->counter++;
-	/*if(self->counter>9 || self->length == 0){
-		redLight(self, NULL);
+
+	if(self->counter > (self->maxSends) || self->length == 0){
+		ASYNC(self->writer, redred, NULL);
 		self->counter = 0;
 	}else{
-		ASYNC(self, redLight, NULL);
-		AFTER(SEC(1), self, greenLight, NULL);
+//		ASYNC(self, redLight, NULL);
+//		AFTER(SEC(1), self, greenLight, NULL);
+		if(self->direction == 1){
+			AFTER(MSEC(500), self->writer, redred, NULL);
+//			ASYNC(self->writer, redred, NULL);
+			AFTER(SEC(1), self->writer, greenred, NULL);
+		}else{
+			AFTER(MSEC(500), self->writer, redred, NULL);
+			AFTER(SEC(1), self->writer, redgreen, NULL);
+		}
 	}
-	*/
+	
 }
 
 void emptyQueue(CarQueue *self, int num){

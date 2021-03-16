@@ -61,8 +61,8 @@ int main(void)
 //	sei();
 	INSTALL(&inputhandl, inputs, IRQ_USART0_RX);
 //	INSTALL(&inputhandl, testInputs, IRQ_PCINT0);
-	tinytimber(&controller, switchLights, NULL);
-	
+//	tinytimber(&controller, switchLights, NULL);
+	tinytimber(&controller, emptyCurrent, NULL);
 //	tinytimber(&writer, writeToPort, 0);
 //	UDR0 = 7;
 }
