@@ -70,7 +70,6 @@ void *GUI(void *arg)
 int openPort()
 {
 	int speed = 9600;
-	//Simulera termios
 	int fd = open("/dev/ttyS0", O_RDWR);
 	if (fd < 0) 
 	{
