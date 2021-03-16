@@ -12,14 +12,6 @@ void setMax(CarQueue *self, int num){
 	self->maxSends = num;
 }
 
-int isEmpty(CarQueue *self, int num){
-	if(self->length>0){
-		return 0;
-	}else{
-		return 1;
-	}
-}
-
 void resetCounter(CarQueue *self, int num){
 	self->counter = 0;
 }
@@ -36,8 +28,6 @@ void carLeavesQueue(CarQueue *self, int num){
 		ASYNC(self->writer, redred, NULL);
 		self->counter = 0;
 	}else{
-//		ASYNC(self, redLight, NULL);
-//		AFTER(SEC(1), self, greenLight, NULL);
 		if(self->direction == 1){
 			AFTER(MSEC(500), self->writer, redred, NULL);
 //			ASYNC(self->writer, redred, NULL);

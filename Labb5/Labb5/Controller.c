@@ -5,30 +5,6 @@
 #include "PortWriter.h"
 
 void emptyCurrent(Controller *self, int num){
-	/*if(self->currentQ->length==0){
-//		ASYNC(self->currentQ, redLight, NULL);
-		switchQueue(Controller *self, int num);
-		AFTER(SEC(0.5), self, emptyCurrent, NULL);
-		return;
-		//anropa portwriter
-	}*/
-	/*CarQueue *currentQ;
-	currentQ = self->currentQ;
-	ASYNC(self->currentQ, carLeavesQueue, NULL);
-	if(self->counter<10 && currentQ->length > 0){
-		AFTER(SEC(1), self, emptyCurrent, NULL);
-		self->counter += 1;
-		//ASYNC(self->currentQ, redLight, NULL);
-	}else if(1){
-		ASYNC(self->currentQ, redLight, NULL);
-		switchQueue(self, NULL);
-		self->counter = 0;
-		AFTER(SEC(5), self->currentQ, greenLight, NULL);
-		AFTER(SEC(5), self, emptyCurrent, NULL);
-	}else{
-		ASYNC(self->currentQ, redLight, NULL);
-		self->counter = 0;
-	}*/
 	CarQueue *currentQ;
 	CarQueue *northQ;
 	CarQueue *southQ;
@@ -42,22 +18,16 @@ void emptyCurrent(Controller *self, int num){
 	ASYNC(self->southbound, resetCounter, NULL);
 	ASYNC(self->northbound, setMax, 0);
 	ASYNC(self->southbound, setMax, 0);
-//	int northEmpty = SYNC(self->northbound, isEmpty, NULL);
-//	int southEmpty = SYNC(self->southbound, isEmpty, NULL);
 	if(northQ->length > 0 && southQ->length > 0){
 		if(self->curr==1){
 			self->currentQ = self->northbound;
 			self->curr = 0;
-//			ASYNC(self->southbound, redLight, NULL);
-//			AFTER(SEC(5), self->northbound, greenLight, NULL);
 			ASYNC(self->writer, redred, NULL);
 			
 			AFTER(SEC(5), self->writer, redgreen, NULL);
 		}else{
 			self->currentQ = self->southbound;
 			self->curr = 1;
-//			ASYNC(self->northbound, redLight, NULL);
-//			AFTER(SEC(5), self->southbound, greenLight, NULL);
 			ASYNC(self->writer, redred, NULL);
 			
 			AFTER(SEC(5), self->writer, greenred, NULL);
@@ -68,14 +38,11 @@ void emptyCurrent(Controller *self, int num){
 		}else{
 			bl = currentQ->length;
 		}
-		ASYNC(self->currentQ, setMax, bl);
+		ASYNC(self->currentQ, setMax, bl-1);
 		AFTER(SEC(5 + bl), self, emptyCurrent, NULL);
 	}else if((northQ->length ==0 && southQ->length > 0) || (northQ->length > 0 && southQ->length == 0)){
 		if(southQ->length == 0){
 			if(self->curr == 1){
-				
-//				ASYNC(self->southbound, redLight, NULL);
-				
 				if(bridge->carcount>0){
 					ASYNC(self->writer, redred,  NULL);
 					AFTER(MSEC(500), self, emptyCurrent, NULL);
@@ -85,12 +52,7 @@ void emptyCurrent(Controller *self, int num){
 					self->currentQ = self->northbound;
 					ASYNC(self->writer, redgreen, NULL);
 				}
-/*				while(bridge->carcount > 0){
-					
-				}*/
-//				ASYNC(self->northbound, greenLight, NULL);
 			}else{
-//				ASYNC(self->northbound, greenLight, NULL);
 				ASYNC(self->writer, redgreen, NULL);
 			}
 			currentQ = self->currentQ;
@@ -99,15 +61,11 @@ void emptyCurrent(Controller *self, int num){
 			}else{
 				bl = currentQ->length;
 			}
-			ASYNC(self->northbound, setMax, bl);
+			ASYNC(self->northbound, setMax, bl-1);
 			AFTER(SEC(bl), self, emptyCurrent, NULL);
 		}else if(northQ->length == 0){
 			if(self->curr == 0){
-				
-//				ASYNC(self->northbound, redLight, NULL);
-
 				if(bridge->carcount>0){
-//					ASYNC(self->writer, redred, NULL);
 					AFTER(MSEC(500), self, emptyCurrent, NULL);
 					return;
 				}else{
@@ -115,14 +73,7 @@ void emptyCurrent(Controller *self, int num){
 					self->currentQ = self->southbound;
 					ASYNC(self->writer, greenred, NULL);
 				}
-				
-				/*while(bridge->carcount > 0){
-					
-					}*/// vänta på att bron blir tom
-//				ASYNC(self->southbound, greenLight, NULL);
-//				ASYNC(self->writer, greenred, NULL);
 			}else{
-//				ASYNC(self->southbound, greenLight, NULL);
 				ASYNC(self->writer, greenred, NULL);
 			}
 			currentQ = self->currentQ;
@@ -131,17 +82,11 @@ void emptyCurrent(Controller *self, int num){
 			}else{
 				bl = currentQ->length;
 			}
-			ASYNC(self->southbound, setMax, bl);
+			ASYNC(self->southbound, setMax, bl-1);
 			AFTER(SEC(bl), self, emptyCurrent, NULL);
 		}
 	}else{
-//		ASYNC(self->writer, redred, NULL);
-	/*	while(northQ->length==0 && southQ->length == 0){
-			
-		}
-		ASYNC(self, emptyCurrent, NULL);
-		*/
-		AFTER(MSEC(500), self, emptyCurrent, NULL); //kanske kör detta i don't know
+		AFTER(MSEC(100), self, emptyCurrent, NULL); //kanske kör detta i don't know
 	}
 	
 }
