@@ -13,7 +13,6 @@ typedef struct{
 	int direction; // 0 är northbound och 1 är southbound 
 	int counter;
 	struct Bridge *bridge;
-//	struct Controller *controller;
 	struct PortWriter *writer;
 	struct GUI *gui;
 	int maxSends;

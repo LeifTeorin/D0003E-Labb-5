@@ -8,6 +8,9 @@
 #include <stdint.h>
 
 void inputs(InputHandler *self){
+	while (!(UCSR0A & (1 << UDRE0))) {
+		
+	}
 	char recieved = UDR0;
 	if(recieved&1 == 1){ // northbound car arrival
 		ASYNC(self->nBound, carArrives, NULL);
@@ -15,10 +18,10 @@ void inputs(InputHandler *self){
 	if(recieved&2){ // northbound enters bridge
 		ASYNC(self->nBound, carLeavesQueue, NULL);
 	}
-	if(recieved&4){
+	if(recieved&4){ // southbound car arrival
 		ASYNC(self->sBound, carArrives, NULL);
 	}
-	if(recieved&8){
+	if(recieved&8){ // southbound enters bridge
 		ASYNC(self->sBound, carLeavesQueue, NULL);
 	}
 }
